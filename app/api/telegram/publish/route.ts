@@ -1,0 +1,179 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+import type { Listing, ListingCTA } from '@/lib/types'
+import { LISTING_TYPE_LABELS } from '@/lib/types'
+
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
+const TELEGRAM_CHANNEL_ID = process.env.TELEGRAM_CHANNEL_ID
+
+async function sendToTelegram(listing: Listing, ctas: ListingCTA[]): Promise<number | null> {
+  if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHANNEL_ID) {
+    console.error('Telegram credentials not configured')
+    return null
+  }
+
+  // Build message text
+  const typeLabel = LISTING_TYPE_LABELS[listing.listing_type]
+  let message = `*${listing.title}*\n\n`
+  message += `📍 Type: ${typeLabel}\n\n`
+  message += `${listing.description}\n\n`
+  
+  // Add CTAs
+  message += '📞 Contact:\n'
+  for (const cta of ctas) {
+    if (cta.cta_type === 'whatsapp') {
+      message += `• WhatsApp: [${cta.value}](https://wa.me/${cta.value.replace(/\D/g, '')})\n`
+    } else if (cta.cta_type === 'telegram') {
+      message += `• Telegram: [@${cta.value.replace('@', '')}](https://t.me/${cta.value.replace('@', '')})\n`
+    } else if (cta.cta_type === 'url') {
+      message += `• [${cta.label || 'Visit'}](${cta.value})\n`
+    }
+  }
+
+  message += `\n🔗 [View Details](${process.env.NEXT_PUBLIC_APP_URL}/listings/${listing.id})`
+
+  try {
+    // If there's an image, send photo with caption
+    if (listing.image_url) {
+      const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: TELEGRAM_CHANNEL_ID,
+          photo: listing.image_url,
+          caption: message,
+          parse_mode: 'Markdown',
+        }),
+      })
+
+      const data = await res.json()
+      if (data.ok) {
+        return data.result.message_id
+      }
+      console.error('Telegram sendPhoto error:', data)
+    }
+
+    // Fallback to text message
+    const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: TELEGRAM_CHANNEL_ID,
+        text: message,
+        parse_mode: 'Markdown',
+        disable_web_page_preview: false,
+      }),
+    })
+
+    const data = await res.json()
+    if (data.ok) {
+      return data.result.message_id
+    }
+    console.error('Telegram sendMessage error:', data)
+    return null
+  } catch (error) {
+    console.error('Telegram API error:', error)
+    return null
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const { listingId } = await request.json()
+
+    if (!listingId) {
+      return NextResponse.json({ error: 'Missing listingId' }, { status: 400 })
+    }
+
+    const supabase = await createClient()
+
+    // Fetch listing with CTAs
+    const { data: listing, error: listingError } = await supabase
+      .from('listings')
+      .select(`
+        *,
+        listing_cta (*)
+      `)
+      .eq('id', listingId)
+      .single() as { data: Listing & { listing_cta: ListingCTA[] } | null; error: any }
+
+    if (listingError || !listing) {
+      return NextResponse.json({ error: 'Listing not found' }, { status: 404 })
+    }
+
+    // Check if already published to Telegram (prevent duplicates)
+    const { data: existingSchedule } = await supabase
+      .from('listing_schedules')
+      .select('telegram_message_id')
+      .eq('listing_id', listingId)
+      .not('telegram_message_id', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single()
+
+    // Only prevent duplicate if last schedule was completed
+    if (existingSchedule?.telegram_message_id) {
+      // Check if it was within the last hour to prevent rapid duplicates
+      const { data: recentSchedule } = await supabase
+        .from('listing_schedules')
+        .select('created_at')
+        .eq('listing_id', listingId)
+        .not('telegram_message_id', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
+
+      if (recentSchedule) {
+        const lastPublishTime = new Date(recentSchedule.created_at).getTime()
+        const oneHourAgo = Date.now() - 60 * 60 * 1000
+        if (lastPublishTime > oneHourAgo) {
+          return NextResponse.json({ 
+            error: 'Listing was already published recently', 
+            lastMessageId: existingSchedule.telegram_message_id 
+          }, { status: 429 })
+        }
+      }
+    }
+
+    // Send to Telegram
+    const messageId = await sendToTelegram(listing, listing.listing_cta || [])
+
+    if (messageId) {
+      // Record the schedule
+      await supabase.from('listing_schedules').insert({
+        listing_id: listingId,
+        scheduled_at: new Date().toISOString(),
+        published_at: new Date().toISOString(),
+        telegram_message_id: messageId,
+        is_completed: true,
+      })
+
+      // Update listing status to published
+      await supabase
+        .from('listings')
+        .update({ status: 'published', updated_at: new Date().toISOString() })
+        .eq('id', listingId)
+
+      // Update telegram views in stats
+      const { data: stats } = await supabase
+        .from('listing_stats')
+        .select('id, telegram_views')
+        .eq('listing_id', listingId)
+        .single()
+
+      if (stats) {
+        await supabase
+          .from('listing_stats')
+          .update({ telegram_views: (stats.telegram_views || 0) + 1, updated_at: new Date().toISOString() })
+          .eq('id', stats.id)
+      }
+
+      return NextResponse.json({ success: true, messageId })
+    }
+
+    return NextResponse.json({ error: 'Failed to send to Telegram' }, { status: 500 })
+  } catch (error) {
+    console.error('Publish error:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}

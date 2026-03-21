@@ -1,0 +1,249 @@
+'use client'
+
+import { useState } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
+import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Empty } from '@/components/ui/empty'
+import { Spinner } from '@/components/ui/spinner'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Textarea } from '@/components/ui/textarea'
+import { toast } from 'sonner'
+import { CheckCircle, XCircle, Send, Eye, ExternalLink } from 'lucide-react'
+import { LISTING_TYPE_LABELS } from '@/lib/types'
+import type { Listing } from '@/lib/types'
+
+interface AdminListingTableProps {
+  listings: Listing[]
+  showActions?: boolean
+  showPublishAction?: boolean
+}
+
+export function AdminListingTable({ listings, showActions = false, showPublishAction = false }: AdminListingTableProps) {
+  const router = useRouter()
+  const [isLoading, setIsLoading] = useState<string | null>(null)
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false)
+  const [selectedListing, setSelectedListing] = useState<Listing | null>(null)
+  const [rejectReason, setRejectReason] = useState('')
+
+  const handleAction = async (listingId: string, action: 'approve' | 'reject' | 'publish', reason?: string) => {
+    setIsLoading(listingId)
+    try {
+      const res = await fetch('/api/admin/listings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ listingId, action, reason }),
+      })
+
+      const data = await res.json()
+
+      if (res.ok) {
+        toast.success(`Listing ${action}ed successfully`)
+        router.refresh()
+      } else {
+        toast.error(data.error || `Failed to ${action} listing`)
+      }
+    } catch {
+      toast.error('An error occurred')
+    } finally {
+      setIsLoading(null)
+      setRejectDialogOpen(false)
+      setSelectedListing(null)
+      setRejectReason('')
+    }
+  }
+
+  const openRejectDialog = (listing: Listing) => {
+    setSelectedListing(listing)
+    setRejectDialogOpen(true)
+  }
+
+  if (listings.length === 0) {
+    return (
+      <Empty className="py-8">
+        <Empty.Title>No listings found</Empty.Title>
+        <Empty.Description>There are no listings in this category.</Empty.Description>
+      </Empty>
+    )
+  }
+
+  return (
+    <>
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Listing</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Owner</TableHead>
+              <TableHead>Stats</TableHead>
+              <TableHead>Created</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {listings.map((listing) => (
+              <TableRow key={listing.id}>
+                <TableCell>
+                  <div className="flex items-center gap-3">
+                    <div className="relative h-12 w-12 overflow-hidden rounded-lg bg-muted">
+                      {listing.image_url ? (
+                        <Image
+                          src={listing.image_url}
+                          alt={listing.title}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
+                          No img
+                        </div>
+                      )}
+                    </div>
+                    <div className="max-w-[200px]">
+                      <p className="truncate font-medium">{listing.title}</p>
+                      <p className="truncate text-sm text-muted-foreground">
+                        {listing.description.slice(0, 50)}...
+                      </p>
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Badge variant="outline">
+                    {LISTING_TYPE_LABELS[listing.listing_type]}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  {listing.user && (
+                    <div className="flex items-center gap-2">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={listing.user.photo_url || undefined} />
+                        <AvatarFallback className="text-xs">
+                          {listing.user.first_name?.[0] || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm">{listing.user.first_name}</span>
+                    </div>
+                  )}
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Eye className="h-4 w-4" />
+                    {listing.listing_stats?.page_views || 0}
+                  </div>
+                </TableCell>
+                <TableCell className="text-sm text-muted-foreground">
+                  {new Date(listing.created_at).toLocaleDateString()}
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex items-center justify-end gap-2">
+                    <Button size="sm" variant="ghost" asChild>
+                      <Link href={`/listings/${listing.id}`}>
+                        <ExternalLink className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                    
+                    {showActions && (
+                      <>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-1 border-emerald-200 text-emerald-600 hover:bg-emerald-50"
+                          onClick={() => handleAction(listing.id, 'approve')}
+                          disabled={isLoading === listing.id}
+                        >
+                          {isLoading === listing.id ? (
+                            <Spinner className="h-4 w-4" />
+                          ) : (
+                            <CheckCircle className="h-4 w-4" />
+                          )}
+                          Approve
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-1 border-red-200 text-red-600 hover:bg-red-50"
+                          onClick={() => openRejectDialog(listing)}
+                          disabled={isLoading === listing.id}
+                        >
+                          <XCircle className="h-4 w-4" />
+                          Reject
+                        </Button>
+                      </>
+                    )}
+
+                    {showPublishAction && (
+                      <Button
+                        size="sm"
+                        className="gap-1"
+                        onClick={() => handleAction(listing.id, 'publish')}
+                        disabled={isLoading === listing.id}
+                      >
+                        {isLoading === listing.id ? (
+                          <Spinner className="h-4 w-4" />
+                        ) : (
+                          <Send className="h-4 w-4" />
+                        )}
+                        Publish
+                      </Button>
+                    )}
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Reject Dialog */}
+      <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reject Listing</DialogTitle>
+            <DialogDescription>
+              Provide a reason for rejecting &quot;{selectedListing?.title}&quot;
+            </DialogDescription>
+          </DialogHeader>
+          <Textarea
+            placeholder="Enter rejection reason (optional)"
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRejectDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => selectedListing && handleAction(selectedListing.id, 'reject', rejectReason)}
+              disabled={isLoading === selectedListing?.id}
+            >
+              {isLoading === selectedListing?.id ? (
+                <Spinner className="mr-2 h-4 w-4" />
+              ) : null}
+              Reject Listing
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  )
+}
