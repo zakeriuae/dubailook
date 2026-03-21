@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Empty } from '@/components/ui/empty'
+import { Empty, EmptyTitle, EmptyDescription } from '@/components/ui/empty'
 import { Spinner } from '@/components/ui/spinner'
 import {
   Table,
@@ -79,8 +79,8 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
   if (listings.length === 0) {
     return (
       <Empty className="py-8">
-        <Empty.Title>No listings found</Empty.Title>
-        <Empty.Description>There are no listings in this category.</Empty.Description>
+        <EmptyTitle>No listings found</EmptyTitle>
+        <EmptyDescription>There are no listings in this category.</EmptyDescription>
       </Empty>
     )
   }

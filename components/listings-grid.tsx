@@ -1,7 +1,7 @@
 'use client'
 
 import { ListingCard } from './listing-card'
-import { Empty } from '@/components/ui/empty'
+import { Empty, EmptyTitle, EmptyDescription } from '@/components/ui/empty'
 import type { Listing } from '@/lib/types'
 
 interface ListingsGridProps {
@@ -20,10 +20,10 @@ export function ListingsGrid({
   if (listings.length === 0) {
     return (
       <Empty className="py-16">
-        <Empty.Title>{emptyMessage}</Empty.Title>
-        <Empty.Description>
+        <EmptyTitle>{emptyMessage}</EmptyTitle>
+        <EmptyDescription>
           Check back later for new listings or adjust your filters.
-        </Empty.Description>
+        </EmptyDescription>
       </Empty>
     )
   }
