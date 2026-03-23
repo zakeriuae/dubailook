@@ -60,9 +60,11 @@ export function ListingForm() {
   const [profile, setProfile] = useState<Profile | null>(null)
 
   useEffect(() => {
+    let mounted = true
     fetch('/api/me')
       .then(r => r.json())
       .then(data => {
+        if (!mounted) return
         if (data.profile) {
           setProfile(data.profile)
           // Pre-fill Telegram
@@ -76,6 +78,8 @@ export function ListingForm() {
         }
       })
       .catch(() => {})
+    
+    return () => { mounted = false }
   }, [])
 
   const form = useForm<ListingFormData>({

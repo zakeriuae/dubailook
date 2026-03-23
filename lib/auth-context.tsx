@@ -42,9 +42,29 @@ export function AuthProvider({ children, initialProfile }: { children: ReactNode
   }
 
   useEffect(() => {
-    if (!initialProfile) {
-      refresh()
+    let mounted = true
+    
+    const refreshSession = async () => {
+      if (!initialProfile) {
+        setIsLoading(true)
+        try {
+          const res = await fetch('/api/auth/session')
+          if (res.ok && mounted) {
+            const data = await res.json()
+            setProfile(data.profile)
+          } else if (mounted) {
+            setProfile(null)
+          }
+        } catch {
+          if (mounted) setProfile(null)
+        } finally {
+          if (mounted) setIsLoading(false)
+        }
+      }
     }
+
+    refreshSession()
+    return () => { mounted = false }
   }, [initialProfile])
 
   return (

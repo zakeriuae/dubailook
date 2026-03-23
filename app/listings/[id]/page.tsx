@@ -95,7 +95,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         </Button>
       </div>
 
-      <main className="container mx-auto max-w-7xl md:py-8">
+      <main className="mx-auto max-w-7xl md:container md:py-8">
         <Button variant="ghost" asChild className="mb-6 hidden md:inline-flex">
           <Link href="/">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -103,7 +103,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
           </Link>
         </Button>
 
-        <div className="grid gap-8 lg:grid-cols-3">
+        <div className="grid gap-4 md:gap-8 lg:grid-cols-3">
           {/* Main Content */}
           <div className="lg:col-span-2">
             <div className="relative aspect-video overflow-hidden bg-muted md:rounded-xl">
