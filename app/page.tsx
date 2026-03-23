@@ -22,7 +22,7 @@ export default async function HomePage() {
       listing_stats (*),
       user:profiles (*)
     `)
-    .eq('status', 'published')
+    .in('status', ['published', 'approved'])
     .order('created_at', { ascending: false })
 
   return (
