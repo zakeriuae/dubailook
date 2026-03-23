@@ -37,7 +37,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         {!isListingDetail && <Header />}
         <main className="flex-1 overflow-x-hidden">
           <div className={cn(
-            "mx-auto max-w-7xl px-4 md:px-6 lg:px-8 py-6 md:py-8 animate-in fade-in slide-in-from-bottom-2 duration-500",
+            "mx-auto max-w-7xl px-4 md:px-6 lg:px-8 py-6 md:py-8",
+            !isListingDetail && "animate-in fade-in slide-in-from-bottom-1 duration-500",
             isListingDetail && "px-0 py-0 md:px-6 md:py-8 md:max-w-7xl"
           )}>
             {children}

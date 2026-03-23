@@ -10,6 +10,12 @@ export const metadata: Metadata = {
   title: 'Dubilook - Property Listings Platform',
   description: 'Find and list properties, land, and real estate projects. Connect with buyers and sellers through Telegram.',
   generator: 'v0.app',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Dubailook',
+  },
   icons: {
     icon: [
       {
@@ -30,9 +36,11 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#2563eb',
+  themeColor: '#ffffff',
   width: 'device-width',
   initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 }
 
 import { AppLayout } from '@/components/app-layout'
