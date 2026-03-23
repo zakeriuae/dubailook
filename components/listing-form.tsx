@@ -125,22 +125,21 @@ export function ListingForm() {
         newUploadingMap[currentIndex] = true
         setUploadingMap({ ...newUploadingMap })
         
-        const fileExt = file.name.split('.').pop()
-        const fileName = `${profile.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`
-        
         try {
-            const { data: uploadData, error: uploadError } = await supabase.storage
-                .from('Dubilook')
-                .upload(fileName, file, {
-                    cacheControl: '3600',
-                    upsert: false,
-                })
+            const formData = new FormData()
+            formData.append('file', file)
 
-            if (uploadError) throw uploadError
+            const res = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData,
+            })
 
-            const { data: { publicUrl } } = supabase.storage
-                .from('Dubilook')
-                .getPublicUrl(uploadData.path)
+            if (!res.ok) {
+                const errorData = await res.json()
+                throw new Error(errorData.error || 'Upload failed')
+            }
+
+            const { publicUrl } = await res.json()
 
             setImageUrls(prev => {
                 const updated = [...prev]

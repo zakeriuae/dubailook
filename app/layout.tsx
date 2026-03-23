@@ -45,16 +45,19 @@ export const viewport: Viewport = {
 
 import { AppLayout } from '@/components/app-layout'
 import { AuthProvider } from '@/lib/auth-context'
+import { getSession } from '@/lib/session'
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const profile = await getSession()
+
   return (
     <html lang="en">
       <body className={`${inter.className} antialiased selection:bg-primary/10`}>
-        <AuthProvider initialProfile={null}>
+        <AuthProvider initialProfile={profile}>
           <AppLayout>
             {children}
           </AppLayout>

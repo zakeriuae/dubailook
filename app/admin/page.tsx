@@ -28,9 +28,8 @@ export default async function AdminPage() {
   // Calculate stats
   const totalListings = allListings.length
   const pendingListings = allListings.filter(l => l.status === 'pending')
-  const approvedListings = allListings.filter(l => l.status === 'approved')
   const rejectedListings = allListings.filter(l => l.status === 'rejected')
-  const publishedListings = allListings.filter(l => l.status === 'published')
+  const publishedListings = allListings.filter(l => l.status === 'published' || l.status === 'approved')
   
   const totalViews = allListings.reduce((acc, l) => acc + (l.listing_stats?.page_views || 0), 0)
   const totalImpressions = allListings.reduce((acc, l) => acc + (l.listing_stats?.list_impressions || 0), 0)
@@ -67,15 +66,7 @@ export default async function AdminPage() {
           </CardContent>
         </Card>
         
-        <Card className="overflow-hidden border-emerald-200 bg-emerald-50/30">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 pb-1 md:p-6 md:pb-2">
-            <CardTitle className="text-[10px] font-medium uppercase tracking-wider text-emerald-700 md:text-sm md:normal-case md:tracking-normal">Approved</CardTitle>
-            <CheckCircle className="h-3 w-3 text-emerald-500 md:h-4 md:w-4" />
-          </CardHeader>
-          <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
-            <div className="text-xl font-bold text-emerald-700 md:text-2xl">{approvedListings.length}</div>
-          </CardContent>
-        </Card>
+        {/* Approved and Published are now treated as one state in calculations */}
 
         <Card className="overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 pb-1 md:p-6 md:pb-2">
@@ -106,12 +97,7 @@ export default async function AdminPage() {
             <span className="text-xs font-medium sm:text-sm">Pending</span>
             <Badge variant="secondary" className="ml-0.5 h-5 px-1.5 text-[10px]">{pendingListings.length}</Badge>
           </TabsTrigger>
-          <TabsTrigger value="approved" className="flex items-center justify-center gap-2 rounded-lg border bg-card py-2.5 data-[state=active]:bg-emerald-600 data-[state=active]:text-white lg:border-none lg:bg-transparent lg:py-1.5">
-            <CheckCircle className="h-4 w-4 shrink-0" />
-            <span className="text-xs font-medium sm:text-sm">Approved</span>
-            <Badge variant="secondary" className="ml-0.5 h-5 px-1.5 text-[10px]">{approvedListings.length}</Badge>
-          </TabsTrigger>
-          <TabsTrigger value="published" className="flex items-center justify-center gap-2 rounded-lg border bg-card py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground lg:border-none lg:bg-transparent lg:py-1.5">
+          <TabsTrigger value="published" className="flex items-center justify-center gap-2 rounded-lg border bg-card py-2.5 data-[state=active]:bg-emerald-600 data-[state=active]:text-white lg:border-none lg:bg-transparent lg:py-1.5">
             <Send className="h-4 w-4 shrink-0" />
             <span className="text-xs font-medium sm:text-sm">Published</span>
             <Badge variant="secondary" className="ml-0.5 h-5 px-1.5 text-[10px]">{publishedListings.length}</Badge>
@@ -135,17 +121,6 @@ export default async function AdminPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="approved">
-          <Card>
-            <CardHeader>
-              <CardTitle>Approved Listings</CardTitle>
-              <CardDescription>Listings ready for publishing</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <AdminListingTable listings={approvedListings} showPublishAction />
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         <TabsContent value="published">
           <Card>

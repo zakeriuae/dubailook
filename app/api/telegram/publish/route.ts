@@ -13,7 +13,7 @@ async function sendToTelegram(chatId: string | number, listing: Listing, ctas: L
 
   // Build message text
   const typeLabel = LISTING_TYPE_LABELS[listing.listing_type]
-  let message = `*${listing.title}*\n\n`
+  let message = `<b>${listing.title}</b>\n\n`
   message += `📍 Type: ${typeLabel}\n\n`
   message += `${listing.description}\n\n`
   
@@ -58,7 +58,7 @@ async function sendToTelegram(chatId: string | number, listing: Listing, ctas: L
           chat_id: chatId,
           photo: listing.image_url,
           caption: message,
-          parse_mode: 'Markdown',
+          parse_mode: 'HTML',
           reply_markup,
         }),
       })
@@ -77,7 +77,7 @@ async function sendToTelegram(chatId: string | number, listing: Listing, ctas: L
       body: JSON.stringify({
         chat_id: chatId,
         text: message,
-        parse_mode: 'Markdown',
+        parse_mode: 'HTML',
         reply_markup,
         disable_web_page_preview: false,
       }),
