@@ -12,7 +12,15 @@ function escapeHTML(str: string): string {
     .replace(/>/g, '&gt;')
 }
 
-async function sendToTelegram(chatId: string | number, listing: Listing, ctas: ListingCTA[]): Promise<number | null> {
+function ensureAbsoluteUrl(url: string): string {
+  if (!url) return ''
+  if (url.startsWith('http://') || url.startsWith('https://')) return url
+  // Handle protocol-relative URLs
+  if (url.startsWith('//')) return `https:${url}`
+  return `https://${url}`
+}
+
+async function sendToTelegram(chatId: string | number, listing: Listing, ctas: ListingCTA[], baseUrl: string): Promise<number | null> {
   if (!TELEGRAM_BOT_TOKEN) {
     console.error('Telegram bot token not configured')
     return null
@@ -29,28 +37,37 @@ async function sendToTelegram(chatId: string | number, listing: Listing, ctas: L
   
   for (const cta of ctas) {
     if (cta.cta_type === 'whatsapp') {
-      buttons.push([{ 
-        text: '💬 WhatsApp', 
-        url: `https://wa.me/${cta.value.replace(/\D/g, '')}` 
-      }])
+      const phone = cta.value.replace(/\D/g, '')
+      if (phone) {
+        buttons.push([{ 
+          text: '💬 WhatsApp', 
+          url: `https://wa.me/${phone}` 
+        }])
+      }
     } else if (cta.cta_type === 'telegram') {
-      const username = cta.value.replace('@', '')
-      buttons.push([{ 
-        text: '✈️ Telegram', 
-        url: `https://t.me/${username}` 
-      }])
+      const username = cta.value.replace('@', '').trim()
+      if (username) {
+        buttons.push([{ 
+          text: '✈️ Telegram', 
+          url: `https://t.me/${username}` 
+        }])
+      }
     } else if (cta.cta_type === 'url') {
-      buttons.push([{ 
-        text: `🔗 ${cta.label || 'Website'}`, 
-        url: cta.value 
-      }])
+      const absoluteUrl = ensureAbsoluteUrl(cta.value.trim())
+      if (absoluteUrl) {
+        buttons.push([{ 
+          text: `🔗 ${escapeHTML(cta.label || 'Website')}`, 
+          url: absoluteUrl 
+        }])
+      }
     }
   }
 
-  // Add View Details button
+  // Add View Details button (ensure absolute URL)
+  const absoluteBaseUrl = ensureAbsoluteUrl(baseUrl)
   buttons.push([{ 
     text: '👁️ View on Web', 
-    url: `${process.env.NEXT_PUBLIC_APP_URL}/listings/${listing.id}` 
+    url: `${absoluteBaseUrl.replace(/\/$/, '')}/listings/${listing.id}` 
   }])
 
   const reply_markup = { inline_keyboard: buttons }
@@ -179,12 +196,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No active Telegram channels configured' }, { status: 500 })
     }
 
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (request.headers.get('origin') || '')
+
     // Broadcast to all channels
     let successCount = 0
     let lastMessageId = null
 
     for (const chatId of activeChannelIds) {
-      const messageId = await sendToTelegram(chatId, listing, listing.listing_cta || [])
+      const messageId = await sendToTelegram(chatId, listing, listing.listing_cta || [], baseUrl)
       if (messageId) {
         successCount++
         lastMessageId = messageId
@@ -225,8 +244,6 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ error: 'Failed to broadcast to any Telegram channel' }, { status: 500 })
-
-    return NextResponse.json({ error: 'Failed to send to Telegram' }, { status: 500 })
   } catch (error) {
     console.error('Publish error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
