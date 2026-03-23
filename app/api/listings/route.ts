@@ -9,7 +9,6 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData()
     
     const dataStr = formData.get('data') as string
-    const imageFile = formData.get('image') as File | null
     
     if (!dataStr) {
       return NextResponse.json({ error: 'Missing data' }, { status: 400 })
@@ -23,12 +22,14 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = await createClient()
-    let imageUrl: string | null = null
+    const imageUrls: string[] = []
 
-    // Upload image if provided
-    if (imageFile) {
+    // Upload multiple images if provided
+    const imageFiles = formData.getAll('images') as File[]
+    for (const imageFile of imageFiles) {
+      if (!imageFile || imageFile.size === 0) continue
       const fileExt = imageFile.name.split('.').pop()
-      const fileName = `${profile.id}/${Date.now()}.${fileExt}`
+      const fileName = `${profile.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`
       
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('Dubilook')
@@ -46,7 +47,7 @@ export async function POST(request: NextRequest) {
         .from('Dubilook')
         .getPublicUrl(uploadData.path)
       
-      imageUrl = urlData.publicUrl
+      imageUrls.push(urlData.publicUrl)
     }
 
     // Create listing
@@ -58,7 +59,7 @@ export async function POST(request: NextRequest) {
         description,
         listing_type,
         publishing_mode,
-        image_url: imageUrl,
+        image_url: imageUrls[0] ?? null,
         status: 'pending',
       })
       .select()
