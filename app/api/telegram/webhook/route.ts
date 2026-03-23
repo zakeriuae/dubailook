@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
+
+export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     
-    // Log for debugging
+    // Log for debugging (Vercel logs will show this)
     console.log('Telegram Webhook received:', JSON.stringify(body, null, 2))
 
-    const supabase = await createClient()
+    const supabase = await createAdminClient()
 
     // 1. Handle being added to a group (my_chat_member)
     if (body.my_chat_member) {
