@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
       const fileName = `${profile.id}/${Date.now()}.${fileExt}`
       
       const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('listing-images')
+        .from('Dubilook')
         .upload(fileName, imageFile, {
           cacheControl: '3600',
           upsert: false,
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
       }
 
       const { data: urlData } = supabase.storage
-        .from('listing-images')
+        .from('Dubilook')
         .getPublicUrl(uploadData.path)
       
       imageUrl = urlData.publicUrl
