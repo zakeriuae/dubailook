@@ -22,6 +22,7 @@ export async function POST(request: NextRequest) {
         newStatus = 'rejected'
         break
       case 'publish':
+      case 'repost':
         newStatus = 'published'
         break
       default:
