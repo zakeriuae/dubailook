@@ -1,7 +1,5 @@
 import { redirect } from 'next/navigation'
 import { getSession } from '@/lib/session'
-import { AuthProvider } from '@/lib/auth-context'
-import { Header } from '@/components/header'
 
 export default async function DashboardLayout({
   children,
@@ -15,13 +13,10 @@ export default async function DashboardLayout({
   }
 
   return (
-    <AuthProvider initialProfile={profile}>
-      <div className="min-h-screen bg-background">
-        <Header />
-        <main className="container mx-auto px-4 py-8">
-          {children}
-        </main>
-      </div>
-    </AuthProvider>
+    <div className="min-h-screen bg-background">
+      <main className="container mx-auto px-4 py-8">
+        {children}
+      </main>
+    </div>
   )
 }
