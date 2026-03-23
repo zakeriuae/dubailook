@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, LayoutDashboard, Plus, User } from 'lucide-react'
+import { Home, LayoutDashboard, Plus, User, Map as MapIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/lib/auth-context'
 
@@ -16,6 +16,7 @@ export function MobileNav() {
     { icon: Home, label: 'Home', href: '/' },
     { icon: LayoutDashboard, label: 'Dash', href: '/dashboard' },
     { icon: Plus, label: 'Post', href: '/listings/new', isCta: true },
+    { icon: MapIcon, label: 'Map', href: '/map' },
     { icon: User, label: 'Profile', href: '/profile' },
   ]
 

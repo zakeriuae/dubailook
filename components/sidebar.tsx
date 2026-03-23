@@ -11,13 +11,15 @@ import {
   Shield, 
   User, 
   MessageSquare,
-  Building2
+  Building2,
+  Map as MapIcon
 } from 'lucide-react'
 
 const navItems = [
   { name: 'Listings', href: '/', icon: Home },
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'New Listing', href: '/listings/new', icon: Plus },
+  { name: 'Map View', href: '/map', icon: MapIcon },
   { name: 'My Profile', href: '/profile', icon: User },
 ]
 
