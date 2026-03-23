@@ -14,6 +14,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
 
   const isListingDetail = pathname.startsWith('/listings/') && pathname.length > 10 && !pathname.includes('/new')
+  const isNewListing = pathname === '/listings/new'
+  const isSimpleLayout = isListingDetail || isNewListing
 
   if (pathname === '/login') {
     return <>{children}</>
@@ -34,18 +36,18 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Main Content Area */}
       <div className="flex flex-1 flex-col relative pb-16 md:pb-0">
-        {!isListingDetail && <Header />}
+        {!isSimpleLayout && <Header />}
         <main className="flex-1 overflow-x-hidden">
           <div className={cn(
             "mx-auto max-w-7xl px-4 md:px-6 lg:px-8 py-6 md:py-8",
-            !isListingDetail && "animate-in fade-in slide-in-from-bottom-1 duration-500",
-            isListingDetail && "px-0 py-0 md:px-6 md:py-8 md:max-w-7xl"
+            !isSimpleLayout && "animate-in fade-in slide-in-from-bottom-1 duration-500",
+            isSimpleLayout && "px-0 py-0 md:px-6 md:py-8 md:max-w-7xl"
           )}>
             {children}
           </div>
         </main>
         
-        {!isListingDetail && <MobileNav />}
+        {!isSimpleLayout && <MobileNav />}
       </div>
     </div>
   )

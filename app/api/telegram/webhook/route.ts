@@ -6,7 +6,7 @@ export const runtime = 'nodejs';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    
+
     // Log for debugging (Vercel logs will show this)
     console.log('Telegram Webhook received:', JSON.stringify(body, null, 2))
 
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     // 1. Handle being added to a group (my_chat_member)
     if (body.my_chat_member) {
       const { chat, new_chat_member } = body.my_chat_member
-      
+
       if (new_chat_member.status === 'member' || new_chat_member.status === 'administrator') {
         // Added to group
         await supabase.from('telegram_channels').upsert({
@@ -33,10 +33,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
+
+
     // 2. Handle commands (/register)
     if (body.message && body.message.text) {
       const { text, chat, from } = body.message
-      
+
       if (text.startsWith('/register')) {
         // Check if sender is an admin in our system
         const { data: profile } = await supabase
