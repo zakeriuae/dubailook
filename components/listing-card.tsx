@@ -67,7 +67,7 @@ function CTAButton({ cta }: { cta: ListingCTA }) {
 
 export function ListingCard({ listing, showStatus = false, showStats = false }: ListingCardProps) {
   return (
-    <Card className="group overflow-hidden transition-all hover:shadow-lg">
+    <Card className="group overflow-hidden transition-all hover:shadow-lg p-0">
       <Link href={`/listings/${listing.id}`}>
         <div className="relative aspect-video overflow-hidden bg-muted">
           {listing.image_url ? (
@@ -75,7 +75,7 @@ export function ListingCard({ listing, showStatus = false, showStats = false }: 
               src={listing.image_url}
               alt={listing.title}
               fill
-              className="object-cover transition-transform group-hover:scale-105"
+              className="object-cover transition-transform duration-500 scale-105 group-hover:scale-110"
             />
           ) : (
             <div className="flex h-full items-center justify-center">
