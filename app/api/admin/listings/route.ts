@@ -49,20 +49,38 @@ export async function POST(request: NextRequest) {
     })
 
     // If publishing OR approving OR reposting, send to Telegram
+    let publishError = null
     if (action === 'publish' || action === 'approve' || action === 'repost') {
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (request.headers.get('origin') || '')
-        await fetch(`${baseUrl}/api/telegram/publish`, {
+        const origin = request.headers.get('origin') || ''
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || origin || 'http://localhost:3000'
+        
+        const publishRes = await fetch(`${baseUrl}/api/telegram/publish`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ listingId, force: action === 'repost' }),
         })
+        
+        if (!publishRes.ok) {
+          const errorData = await publishRes.json().catch(() => ({ error: 'Unknown publishing error' }))
+          publishError = errorData.error || 'Failed to send to Telegram'
+          console.error('Telegram publish API failed:', errorData)
+        }
       } catch (e) {
-        console.error('Failed to publish to Telegram:', e)
+        publishError = 'Connection error to publishing service'
+        console.error('Failed to trigger Telegram publish:', e)
       }
     }
 
-    return NextResponse.json({ success: true, status: newStatus })
+    if (publishError && action === 'repost') {
+      return NextResponse.json({ error: publishError }, { status: 500 })
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      status: newStatus,
+      warning: publishError // Include as warning if it was part of an approve action
+    })
   } catch (error) {
     console.error('Admin action error:', error)
     if ((error as Error).message === 'Unauthorized') {

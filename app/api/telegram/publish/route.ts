@@ -72,6 +72,13 @@ async function sendToTelegram(chatId: string | number, listing: Listing, ctas: L
 
   const reply_markup = { inline_keyboard: buttons }
 
+  console.log('Sending to Telegram:', {
+    chatId,
+    hasPhoto: !!listing.image_url,
+    buttonCount: buttons.length,
+    messageLength: message.length
+  })
+
   try {
     // If there's an image, send photo with caption
     if (listing.image_url) {
@@ -91,7 +98,7 @@ async function sendToTelegram(chatId: string | number, listing: Listing, ctas: L
       if (data.ok) {
         return data.result.message_id
       }
-      console.error('Telegram sendPhoto error:', data)
+      console.error('Telegram sendPhoto error:', JSON.stringify(data, null, 2))
     }
 
     // Fallback to text message
@@ -111,7 +118,7 @@ async function sendToTelegram(chatId: string | number, listing: Listing, ctas: L
     if (data.ok) {
       return data.result.message_id
     }
-    console.error('Telegram sendMessage error:', data)
+    console.error('Telegram sendMessage error:', JSON.stringify(data, null, 2))
     return null
   } catch (error) {
     console.error('Telegram API error:', error)
