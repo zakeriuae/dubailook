@@ -66,12 +66,12 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
     notFound()
   }
 
-  // Security check: Only allow viewing published listings, or own listings, or if admin
-  const isPublished = listing.status === 'published'
+  // Security check: Only allow viewing published/approved listings, or own listings, or if admin
+  const isPubliclyVisible = ['published', 'approved'].includes(listing.status)
   const isOwner = profile && listing.user_id === profile.id
   const isAdmin = profile?.is_admin
 
-  if (!isPublished && !isOwner && !isAdmin) {
+  if (!isPubliclyVisible && !isOwner && !isAdmin) {
     notFound()
   }
 

@@ -1,8 +1,6 @@
 import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { getSession } from '@/lib/session'
-import { AuthProvider } from '@/lib/auth-context'
-import { Header } from '@/components/header'
 import { ListingsGrid } from '@/components/listings-grid'
 import { ListingsFilters } from '@/components/listings-filters'
 import { Spinner } from '@/components/ui/spinner'
