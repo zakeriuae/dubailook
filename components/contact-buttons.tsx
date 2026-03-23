@@ -19,8 +19,8 @@ export function ContactButtons({ ctas, variant = 'stack' }: ContactButtonsProps)
   const handleContactClick = (e: React.MouseEvent, cta: ListingCTA) => {
     if (!isAuthenticated) {
       e.preventDefault()
-      toast.error('Authentication Required', {
-        description: 'Please log in to view contact details and connect with the lister.',
+      toast.error('Login Required', {
+        description: 'To view contact details and connect with the advertiser, please log in first.',
         action: {
           label: 'Login',
           onClick: () => router.push(`/login?redirect=${window.location.pathname}`)
