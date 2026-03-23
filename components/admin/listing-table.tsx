@@ -31,6 +31,7 @@ import { toast } from 'sonner'
 import { CheckCircle, XCircle, Send, Eye, ExternalLink } from 'lucide-react'
 import { LISTING_TYPE_LABELS } from '@/lib/types'
 import type { Listing } from '@/lib/types'
+import { getOptimizedImageUrl } from '@/lib/storage'
 
 interface AdminListingTableProps {
   listings: Listing[]
@@ -109,7 +110,7 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
                     <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-muted">
                       {listing.image_url ? (
                         <Image
-                          src={listing.image_url}
+                          src={getOptimizedImageUrl(listing.image_url, { width: 100 })}
                           alt={listing.title}
                           fill
                           className="object-cover"
@@ -136,7 +137,7 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
                 <TableCell>
                   {listing.user && (
                     <div className="flex items-center gap-2">
-                      <Avatar className="h-6 w-6">
+                       <Avatar className="h-6 w-6">
                         <AvatarImage src={listing.user.photo_url || undefined} />
                         <AvatarFallback className="text-[10px]">
                           {listing.user.first_name?.[0] || 'U'}
@@ -224,7 +225,7 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
                 <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-muted">
                   {listing.image_url ? (
                     <Image
-                      src={listing.image_url}
+                      src={getOptimizedImageUrl(listing.image_url, { width: 100 })}
                       alt={listing.title}
                       fill
                       className="object-cover"

@@ -22,32 +22,30 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = await createAdminClient()
-    const imageUrls: string[] = []
-
-    // Upload multiple images if provided
+    const imageUrls: string[] = data.image_urls || []
+    
+    // Optionally still handle direct uploads if provided (fallback)
     const imageFiles = formData.getAll('images') as File[]
-    for (const imageFile of imageFiles) {
-      if (!imageFile || imageFile.size === 0) continue
-      const fileExt = imageFile.name.split('.').pop()
-      const fileName = `${profile.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`
-      
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('Dubilook')
-        .upload(fileName, imageFile, {
-          cacheControl: '3600',
-          upsert: false,
-        })
+    if (imageFiles.length > 0) {
+      for (const imageFile of imageFiles) {
+        if (!imageFile || imageFile.size === 0) continue
+        const fileExt = imageFile.name.split('.').pop()
+        const fileName = `${profile.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('Dubilook')
+          .upload(fileName, imageFile, {
+            cacheControl: '3600',
+            upsert: false,
+          })
 
-      if (uploadError) {
-        console.error('Image upload error:', uploadError)
-        return NextResponse.json({ error: `Image upload failed: ${uploadError.message}` }, { status: 500 })
+        if (!uploadError) {
+          const { data: urlData } = supabase.storage
+            .from('Dubilook')
+            .getPublicUrl(uploadData.path)
+          imageUrls.push(urlData.publicUrl)
+        }
       }
-
-      const { data: urlData } = supabase.storage
-        .from('Dubilook')
-        .getPublicUrl(uploadData.path)
-      
-      imageUrls.push(urlData.publicUrl)
     }
 
     // Create listing

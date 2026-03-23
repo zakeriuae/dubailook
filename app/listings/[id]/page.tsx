@@ -14,6 +14,7 @@ import {
 import { LISTING_TYPE_LABELS, LISTING_STATUS_LABELS } from '@/lib/types'
 import type { Listing } from '@/lib/types'
 import { ContactButtons } from '@/components/contact-buttons'
+import { getOptimizedImageUrl } from '@/lib/storage'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,22 +28,24 @@ const typeIcons: Record<string, React.ReactNode> = {
 
 async function incrementViewCount(listingId: string) {
   const supabase = await createClient()
-  
+
   const { data: stats } = await supabase
     .from('listing_stats')
     .select('id, page_views')
     .eq('listing_id', listingId)
     .single()
-  
+
   if (stats) {
     await supabase
       .from('listing_stats')
       .update({ page_views: stats.page_views + 1, updated_at: new Date().toISOString() })
       .eq('id', stats.id)
   } else {
+    // Try to create it if it somehow doesn't exist
     await supabase
       .from('listing_stats')
       .insert({ listing_id: listingId, page_views: 1 })
+      .select()
   }
 }
 
@@ -50,7 +53,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
   const { id } = await params
   const profile = await getSession()
   const supabase = await createClient()
-  
+
   const { data: listing } = await supabase
     .from('listings')
     .select(`
@@ -61,7 +64,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
     `)
     .eq('id', id)
     .single() as { data: Listing | null }
-  
+
   if (!listing) {
     notFound()
   }
@@ -75,8 +78,8 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
     notFound()
   }
 
-  // Increment view count
-  await incrementViewCount(id)
+  // Increment view count (async, don't block render)
+  incrementViewCount(id).catch(err => console.error('Failed to increment view count:', err))
 
   const user = listing.user
 
@@ -111,7 +114,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
             <div className="relative aspect-video overflow-hidden bg-transparent md:rounded-xl md:bg-muted">
               {listing.image_url ? (
                 <Image
-                  src={listing.image_url}
+                  src={getOptimizedImageUrl(listing.image_url, { width: 800 })}
                   alt={listing.title}
                   fill
                   className="object-cover"
@@ -166,7 +169,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
             </Card>
           </div>
 
-          <div className="space-y-6 px-4 md:px-0">
+          <div className="space-y-6 px-0 md:px-0">
             {/* Contact Card - Hidden on Mobile sticky footer covers it */}
             <Card className="hidden md:block">
               <CardContent className="pt-6">
@@ -176,7 +179,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
             </Card>
 
             {user && (
-              <Card className="mb-8 md:mb-0">
+              <Card className="mb-8 md:mb-0 border-x-0 rounded-none md:border-x md:rounded-xl shadow-none md:shadow-sm border-t md:border-t-0">
                 <CardContent className="pt-6">
                   <h2 className="mb-4 text-lg font-semibold">Listed By</h2>
                   <div className="flex items-center gap-3">
@@ -200,7 +203,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         </div>
       </main>
 
-      <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card/95 p-4 pb-safe backdrop-blur md:hidden">
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card/95 p-4 pb-safe-offset-4 backdrop-blur md:hidden">
         <div className="mx-auto flex max-w-md items-center gap-3">
           <div className="flex-1">
             <ContactButtons ctas={listing.listing_cta || []} variant="row" />

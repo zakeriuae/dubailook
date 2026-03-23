@@ -65,6 +65,8 @@ function CTAButton({ cta }: { cta: ListingCTA }) {
   )
 }
 
+import { getOptimizedImageUrl } from '@/lib/storage'
+
 export function ListingCard({ listing, showStatus = false, showStats = false }: ListingCardProps) {
   return (
     <Card className="group overflow-hidden transition-all hover:shadow-lg p-0">
@@ -72,7 +74,7 @@ export function ListingCard({ listing, showStatus = false, showStats = false }: 
         <div className="relative aspect-video overflow-hidden bg-muted">
           {listing.image_url ? (
             <Image
-              src={listing.image_url}
+              src={getOptimizedImageUrl(listing.image_url, { width: 400 })}
               alt={listing.title}
               fill
               className="object-cover transition-transform duration-500 scale-105 group-hover:scale-110"

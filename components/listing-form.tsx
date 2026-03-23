@@ -46,12 +46,15 @@ const listingTypes: { value: ListingType; icon: React.ReactNode }[] = [
 
 const publishingModes: PublishingMode[] = ['one_time', 'ten_times_daily', 'ten_times_every_other_day', 'five_times_weekly']
 
+import { createClient } from '@/lib/supabase/client'
+
 export function ListingForm() {
   const router = useRouter()
   const [step, setStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [imageFiles, setImageFiles] = useState<File[]>([])
-  const [imagePreviews, setImagePreviews] = useState<string[]>([])
+  const [isUploading, setIsUploading] = useState(false) // For global upload state
+  const [imageUrls, setImageUrls] = useState<string[]>([])
+  const [uploadingMap, setUploadingMap] = useState<Record<number, boolean>>({}) // Track per-image upload state
   
   const [whatsapp, setWhatsapp] = useState<ContactMethod>({ enabled: false, value: '' })
   const [telegram, setTelegram] = useState<ContactMethod>({ enabled: false, value: '' })
@@ -92,36 +95,84 @@ export function ListingForm() {
     },
   })
 
-  const handleImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImagesChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
     if (files.length === 0) return
+    if (!profile) {
+      toast.error('You must be logged in to upload images')
+      return
+    }
+
+    const supabase = createClient()
+    const startIndex = imageUrls.length
     
-    const newFiles = [...imageFiles, ...files].slice(0, 5)
-    setImageFiles(newFiles)
+    // Add placeholders to show previews immediately (mock)
+    const newUrls = [...imageUrls]
+    const newUploadingMap = { ...uploadingMap }
     
-    const previews: string[] = []
-    const readers = newFiles.map(file => {
-      return new Promise<void>(resolve => {
+    for (let i = 0; i < files.length && (startIndex + i) < 5; i++) {
+        const file = files[i]
+        const currentIndex = startIndex + i
+        
+        // Show local preview immediately
         const reader = new FileReader()
         reader.onloadend = () => {
-          previews.push(reader.result as string)
-          resolve()
+            // We use the same array to manage order
         }
         reader.readAsDataURL(file)
-      })
-    })
 
-    Promise.all(readers).then(() => setImagePreviews(previews))
+        // Start upload
+        newUploadingMap[currentIndex] = true
+        setUploadingMap({ ...newUploadingMap })
+        
+        const fileExt = file.name.split('.').pop()
+        const fileName = `${profile.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`
+        
+        try {
+            const { data: uploadData, error: uploadError } = await supabase.storage
+                .from('Dubilook')
+                .upload(fileName, file, {
+                    cacheControl: '3600',
+                    upsert: false,
+                })
+
+            if (uploadError) throw uploadError
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('Dubilook')
+                .getPublicUrl(uploadData.path)
+
+            setImageUrls(prev => {
+                const updated = [...prev]
+                updated[currentIndex] = publicUrl
+                return updated
+            })
+        } catch (err) {
+            console.error('Upload failed:', err)
+            toast.error(`Failed to upload ${file.name}`)
+        } finally {
+            setUploadingMap(prev => {
+                const updated = { ...prev }
+                delete updated[currentIndex]
+                return updated
+            })
+        }
+    }
   }
 
   const removeImage = (index: number) => {
-    const newFiles = [...imageFiles]
-    newFiles.splice(index, 1)
-    setImageFiles(newFiles)
+    setImageUrls(prev => {
+        const updated = [...prev]
+        updated.splice(index, 1)
+        return updated
+    })
     
-    const newPreviews = [...imagePreviews]
-    newPreviews.splice(index, 1)
-    setImagePreviews(newPreviews)
+    // Also clean up uploading map if needed
+    setUploadingMap(prev => {
+        const updated = { ...prev }
+        delete updated[index]
+        return updated
+    })
   }
 
   const onSubmit = async (data: ListingFormData) => {
@@ -135,15 +186,20 @@ export function ListingForm() {
       return
     }
 
+    if (Object.keys(uploadingMap).length > 0) {
+        toast.error('Please wait for images to finish uploading')
+        return
+    }
+
     setIsSubmitting(true)
     try {
       const formData = new FormData()
-      formData.append('data', JSON.stringify({ ...data, ctas: activeCtas }))
+      formData.append('data', JSON.stringify({ 
+        ...data, 
+        ctas: activeCtas,
+        image_urls: imageUrls.filter(Boolean) // Send the uploaded URLs
+      }))
       
-      imageFiles.forEach(file => {
-        formData.append('images', file)
-      })
-
       const res = await fetch('/api/listings', {
         method: 'POST',
         body: formData,
@@ -238,21 +294,48 @@ export function ListingForm() {
               <Label htmlFor="description">Description</Label>
               <Textarea id="description" placeholder="Describe property features, location, etc." className="min-h-[150px]" {...form.register('description')} />
             </div>
-            <div className="space-y-2">
-              <Label>Photos (Up to 5)</Label>
-              <div className="flex flex-wrap gap-4">
-                {imagePreviews.map((preview, i) => (
-                  <div key={i} className="relative h-24 w-24">
-                    <img src={preview} className="h-full w-full rounded-lg object-cover" alt="" />
-                    <button type="button" onClick={() => removeImage(i)} className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-white">
-                      <X className="h-4 w-4" />
-                    </button>
+            <div className="space-y-3">
+              <Label className="flex justify-between">
+                <span>Photos <span className="text-muted-foreground font-normal">(Optional)</span></span>
+                <span className="text-xs text-muted-foreground">{imageUrls.length}/5</span>
+              </Label>
+              <div className="flex flex-wrap gap-3">
+                {imageUrls.map((url, i) => (
+                  <div key={i} className="relative group h-24 w-24 overflow-hidden rounded-xl border bg-muted shadow-sm">
+                    {uploadingMap[i] ? (
+                        <div className="flex h-full w-full items-center justify-center bg-background/50 backdrop-blur-[2px]">
+                            <Spinner className="h-5 w-5 text-primary" />
+                        </div>
+                    ) : (
+                        <>
+                            <img 
+                                src={url} 
+                                className="h-full w-full object-cover transition-transform group-hover:scale-110" 
+                                alt="" 
+                            />
+                            <button 
+                                type="button" 
+                                onClick={() => removeImage(i)} 
+                                className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-destructive"
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+                        </>
+                    )}
                   </div>
                 ))}
-                {imageFiles.length < 5 && (
-                  <label className="flex h-24 w-24 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed hover:border-primary">
+                {imageUrls.length < 5 && (
+                  <label className="flex h-24 w-24 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-muted-foreground/25 transition-colors hover:border-primary hover:bg-primary/5">
                     <Upload className="h-6 w-6 text-muted-foreground" />
-                    <Input type="file" multiple accept="image/*" className="hidden" onChange={handleImagesChange} />
+                    <span className="mt-1 text-[10px] text-muted-foreground font-medium">Add Photo</span>
+                    <Input 
+                        type="file" 
+                        multiple 
+                        accept="image/*" 
+                        className="hidden" 
+                        onChange={handleImagesChange}
+                        disabled={Object.keys(uploadingMap).length > 0} 
+                    />
                   </label>
                 )}
               </div>
@@ -390,19 +473,22 @@ export function ListingForm() {
         </Card>
       )}
 
-      <div className="mt-8 flex justify-between">
-        <Button type="button" variant="outline" onClick={() => (step === 1 ? router.push('/dashboard') : setStep(step - 1))}>
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back
-        </Button>
-        {step < 4 ? (
-          <Button type="button" onClick={() => setStep(step + 1)} disabled={!canProceed()}>
-            Next <ArrowRight className="ml-2 h-4 w-4" />
+      {/* Sticky Bottom Actions (Mobile) / Regular Actions (Desktop) */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background/80 p-4 pb-safe-offset-4 backdrop-blur-md md:relative md:mt-8 md:border-none md:bg-transparent md:p-0">
+        <div className="mx-auto flex max-w-2xl justify-between">
+          <Button type="button" variant="outline" onClick={() => (step === 1 ? router.push('/dashboard') : setStep(step - 1))}>
+            <ArrowLeft className="mr-2 h-4 w-4" /> Back
           </Button>
-        ) : (
-          <Button type="submit" disabled={isSubmitting || !canProceed()} className="min-w-[150px]">
-            {isSubmitting ? <Spinner className="h-4 w-4" /> : 'Create Listing'}
-          </Button>
-        )}
+          {step < 4 ? (
+            <Button type="button" onClick={() => setStep(step + 1)} disabled={!canProceed()}>
+              Next <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          ) : (
+            <Button type="submit" disabled={isSubmitting || !canProceed()} className="min-w-[150px]">
+              {isSubmitting ? <Spinner className="h-4 w-4" /> : 'Create Listing'}
+            </Button>
+          )}
+        </div>
       </div>
     </form>
   )
