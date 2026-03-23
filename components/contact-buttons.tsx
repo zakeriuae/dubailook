@@ -19,10 +19,10 @@ export function ContactButtons({ ctas, variant = 'stack' }: ContactButtonsProps)
   const handleContactClick = (e: React.MouseEvent, cta: ListingCTA) => {
     if (!isAuthenticated) {
       e.preventDefault()
-      toast.error('ثبت نام / ورود الزامی است', {
-        description: 'برای مشاهده اطلاعات تماس و ارتباط با آگهی‌دهنده، لطفاً ابتدا وارد حساب کاربری خود شوید.',
+      toast.error('Authentication Required', {
+        description: 'Please log in to view contact details and connect with the lister.',
         action: {
-          label: 'ورود به سایت',
+          label: 'Login',
           onClick: () => router.push(`/login?redirect=${window.location.pathname}`)
         }
       })
