@@ -33,7 +33,7 @@ export function Sidebar() {
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-lg shadow-primary/20">
           <Building2 className="h-6 w-6 text-primary-foreground" />
         </div>
-        <span className="text-xl font-bold tracking-tight text-foreground">DubaiLook</span>
+        <span className="text-xl font-bold tracking-tight text-foreground">Dubilook</span>
       </div>
 
       <nav className="flex-1 space-y-1">

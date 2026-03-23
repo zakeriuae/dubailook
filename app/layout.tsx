@@ -7,7 +7,7 @@ import './globals.css'
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'RealEstate Hub - Property Listings Platform',
+  title: 'Dubilook - Property Listings Platform',
   description: 'Find and list properties, land, and real estate projects. Connect with buyers and sellers through Telegram.',
   generator: 'v0.app',
   icons: {

@@ -30,15 +30,18 @@ export function Header() {
       isScrolled ? 'bg-card/80 backdrop-blur-md shadow-sm border-b' : 'bg-transparent'
     }`}>
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        {/* Mobile: Show logo or title, Desktop: Empty space since logo is in sidebar */}
-        <div className="flex items-center gap-2 md:hidden">
+        {/* Logo: Always show on mobile. Show on desktop only if Sidebar is hidden (not authenticated) */}
+        <div className={`flex items-center gap-2 ${isAuthenticated ? 'md:hidden' : ''}`}>
           <Link href="/" className="flex items-center gap-2">
-            <span className="text-xl font-bold tracking-tight text-primary">DubaiLook</span>
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary md:h-9 md:w-9">
+              <LogOut className="h-4 w-4 text-primary-foreground -rotate-90" /> {/* Temporary icon until I find Building2 if needed */}
+            </div>
+            <span className="text-xl font-bold tracking-tight text-primary md:text-2xl">Dubilook</span>
           </Link>
         </div>
 
-        <div className="hidden md:block">
-          {/* Dashboard Title or Search Bar could go here */}
+        <div className="hidden md:block flex-1 ml-8">
+          {/* Search bar could go here */}
         </div>
 
         {/* Right side: Notifications & Profile */}
