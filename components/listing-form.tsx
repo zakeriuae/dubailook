@@ -69,6 +69,10 @@ export function ListingForm() {
           if (data.profile.telegram_username) {
             setTelegram(prev => ({ ...prev, value: `@${data.profile.telegram_username}`, enabled: true }))
           }
+          // Pre-fill WhatsApp
+          if (data.profile.whatsapp) {
+            setWhatsapp(prev => ({ ...prev, value: data.profile.whatsapp, enabled: true }))
+          }
         }
       })
       .catch(() => {})
@@ -290,43 +294,91 @@ export function ListingForm() {
           </CardHeader>
           <CardContent className="space-y-4">
             {/* WhatsApp Row */}
-            <div className="flex flex-col gap-2 rounded-lg border p-4">
-              <div className="flex items-center gap-3">
-                <Checkbox id="use-whatsapp" checked={whatsapp.enabled} onCheckedChange={(val: boolean | string) => setWhatsapp({ ...whatsapp, enabled: !!val })} />
-                <Label htmlFor="use-whatsapp" className="flex items-center gap-2 cursor-pointer font-bold">
-                  <Phone className="h-4 w-4 text-green-500" /> WhatsApp
+            <div className={`flex flex-col gap-3 rounded-xl border-2 p-4 transition-all ${whatsapp.enabled ? 'border-primary bg-primary/5' : 'border-border'}`}>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="use-whatsapp" className="flex flex-1 cursor-pointer items-center gap-3 font-bold text-lg">
+                  <div className={`rounded-lg p-2 ${whatsapp.enabled ? 'bg-green-500 text-white' : 'bg-muted'}`}>
+                    <Phone className="h-5 w-5" />
+                  </div>
+                  WhatsApp
                 </Label>
+                <Checkbox 
+                  id="use-whatsapp" 
+                  checked={whatsapp.enabled} 
+                  onCheckedChange={(val: boolean) => setWhatsapp({ ...whatsapp, enabled: val })} 
+                  className="h-6 w-6 rounded-md"
+                />
               </div>
               {whatsapp.enabled && (
-                <Input placeholder="Phone number (+97...)" value={whatsapp.value} onChange={(e) => setWhatsapp({ ...whatsapp, value: e.target.value })} />
+                <div className="animate-in fade-in slide-in-from-top-1 duration-200">
+                  <Input 
+                    placeholder="Phone number (+97...)" 
+                    value={whatsapp.value} 
+                    onChange={(e) => setWhatsapp({ ...whatsapp, value: e.target.value })}
+                    className="bg-background"
+                  />
+                </div>
               )}
             </div>
 
             {/* Telegram Row */}
-            <div className="flex flex-col gap-2 rounded-lg border p-4">
-              <div className="flex items-center gap-3">
-                <Checkbox id="use-telegram" checked={telegram.enabled} onCheckedChange={(val: boolean | string) => setTelegram({ ...telegram, enabled: !!val })} />
-                <Label htmlFor="use-telegram" className="flex items-center gap-2 cursor-pointer font-bold">
-                  <MessageCircle className="h-4 w-4 text-blue-400" /> Telegram
+            <div className={`flex flex-col gap-3 rounded-xl border-2 p-4 transition-all ${telegram.enabled ? 'border-primary bg-primary/5' : 'border-border'}`}>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="use-telegram" className="flex flex-1 cursor-pointer items-center gap-3 font-bold text-lg">
+                  <div className={`rounded-lg p-2 ${telegram.enabled ? 'bg-blue-400 text-white' : 'bg-muted'}`}>
+                    <MessageCircle className="h-5 w-5" />
+                  </div>
+                  Telegram
                 </Label>
+                <Checkbox 
+                  id="use-telegram" 
+                  checked={telegram.enabled} 
+                  onCheckedChange={(val: boolean) => setTelegram({ ...telegram, enabled: val })}
+                  className="h-6 w-6 rounded-md"
+                />
               </div>
               {telegram.enabled && (
-                <Input placeholder="@username" value={telegram.value} onChange={(e) => setTelegram({ ...telegram, value: e.target.value })} />
+                <div className="animate-in fade-in slide-in-from-top-1 duration-200">
+                  <Input 
+                    placeholder="@username" 
+                    value={telegram.value} 
+                    onChange={(e) => setTelegram({ ...telegram, value: e.target.value })}
+                    className="bg-background"
+                  />
+                </div>
               )}
             </div>
 
             {/* URL Row */}
-            <div className="flex flex-col gap-2 rounded-lg border p-4">
-              <div className="flex items-center gap-3">
-                <Checkbox id="use-url" checked={url.enabled} onCheckedChange={(val: boolean | string) => setUrl({ ...url, enabled: !!val })} />
-                <Label htmlFor="use-url" className="flex items-center gap-2 cursor-pointer font-bold">
-                  <LinkIcon className="h-4 w-4" /> Link / Website
+            <div className={`flex flex-col gap-3 rounded-xl border-2 p-4 transition-all ${url.enabled ? 'border-primary bg-primary/5' : 'border-border'}`}>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="use-url" className="flex flex-1 cursor-pointer items-center gap-3 font-bold text-lg">
+                  <div className={`rounded-lg p-2 ${url.enabled ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                    <LinkIcon className="h-5 w-5" />
+                  </div>
+                  Link / Website
                 </Label>
+                <Checkbox 
+                  id="use-url" 
+                  checked={url.enabled} 
+                  onCheckedChange={(val: boolean) => setUrl({ ...url, enabled: val })}
+                  className="h-6 w-6 rounded-md"
+                />
               </div>
               {url.enabled && (
-                <div className="space-y-2">
-                  <Input placeholder="https://..." value={url.value} onChange={(e) => setUrl({ ...url, value: e.target.value })} />
-                  <Input placeholder="Button Label (optional)" value={url.label || ''} onChange={(e) => setUrl({ ...url, label: e.target.value })} />
+                <div className="space-y-3 animate-in fade-in slide-in-from-top-1 duration-200">
+                  <Input 
+                    placeholder="https://..." 
+                    value={url.value} 
+                    onChange={(e) => setUrl({ ...url, value: e.target.value })}
+                    className="bg-background"
+                  />
+                  <Input 
+                    placeholder="Button Label (optional)" 
+                    value={url.label || ''} 
+                    onChange={(e) => setUrl({ ...url, label: e.target.value })}
+                    className="bg-background"
+                  />
                 </div>
               )}
             </div>

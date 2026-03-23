@@ -10,6 +10,7 @@ export interface Profile {
   first_name: string | null
   last_name: string | null
   photo_url: string | null
+  whatsapp: string | null
   is_admin: boolean
   created_at: string
   updated_at: string

@@ -78,13 +78,24 @@ export async function POST(request: NextRequest) {
       label: cta.label || null,
     }))
 
-    const { error: ctaError } = await supabase
-      .from('listing_cta')
-      .insert(ctaEntries)
-
     if (ctaError) {
       console.error('CTA creation error:', ctaError)
       // Don't fail the whole operation, listing is created
+    }
+
+    // Update user profile with latest contact info for future pre-filling
+    const whatsappCTA = ctas.find((c: any) => c.type === 'whatsapp')
+    const telegramCTA = ctas.find((c: any) => c.type === 'telegram')
+    
+    if (whatsappCTA || telegramCTA) {
+      const profileUpdates: any = {}
+      if (whatsappCTA) profileUpdates.whatsapp = whatsappCTA.value
+      if (telegramCTA) profileUpdates.telegram_username = telegramCTA.value.replace('@', '')
+      
+      await supabase
+        .from('profiles')
+        .update(profileUpdates)
+        .eq('id', profile.id)
     }
 
     // Create stats entry
