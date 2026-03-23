@@ -125,7 +125,7 @@ export function ListingCard({ listing, showStatus = false, showStats = false }: 
       </CardContent>
       
       {listing.listing_cta && listing.listing_cta.length > 0 && (
-        <CardFooter className="flex flex-wrap gap-2 pt-0">
+        <CardFooter className="flex flex-wrap gap-2 pt-0 pb-4">
           {listing.listing_cta.map((cta) => (
             <CTAButton key={cta.id} cta={cta} />
           ))}
