@@ -5,6 +5,13 @@ import { LISTING_TYPE_LABELS } from '@/lib/types'
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
 
+function escapeHTML(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+}
+
 async function sendToTelegram(chatId: string | number, listing: Listing, ctas: ListingCTA[]): Promise<number | null> {
   if (!TELEGRAM_BOT_TOKEN) {
     console.error('Telegram bot token not configured')
@@ -13,9 +20,9 @@ async function sendToTelegram(chatId: string | number, listing: Listing, ctas: L
 
   // Build message text
   const typeLabel = LISTING_TYPE_LABELS[listing.listing_type]
-  let message = `<b>${listing.title}</b>\n\n`
+  let message = `<b>${escapeHTML(listing.title)}</b>\n\n`
   message += `📍 Type: ${typeLabel}\n\n`
-  message += `${listing.description}\n\n`
+  message += `${escapeHTML(listing.description)}\n\n`
   
   // Prepare inline buttons
   const buttons = []

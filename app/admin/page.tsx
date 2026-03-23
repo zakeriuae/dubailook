@@ -91,7 +91,7 @@ export default async function AdminPage() {
 
       {/* Listings Tabs */}
       <Tabs defaultValue="pending" className="space-y-6">
-        <TabsList className="grid h-auto w-full grid-cols-2 gap-2 bg-transparent p-0 lg:flex lg:w-auto lg:grid-cols-none lg:bg-muted lg:p-1">
+        <TabsList className="grid h-auto w-full grid-cols-3 gap-2 bg-transparent p-0 lg:flex lg:w-auto lg:grid-cols-none lg:bg-muted lg:p-1">
           <TabsTrigger value="pending" className="flex items-center justify-center gap-2 rounded-lg border bg-card py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground lg:border-none lg:bg-transparent lg:py-1.5">
             <Clock className="h-4 w-4 shrink-0" />
             <span className="text-xs font-medium sm:text-sm">Pending</span>
