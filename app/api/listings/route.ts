@@ -78,6 +78,10 @@ export async function POST(request: NextRequest) {
       label: cta.label || null,
     }))
 
+    const { error: ctaError } = await supabase
+      .from('listing_cta')
+      .insert(ctaEntries)
+
     if (ctaError) {
       console.error('CTA creation error:', ctaError)
       // Don't fail the whole operation, listing is created
