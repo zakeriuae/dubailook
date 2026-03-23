@@ -26,10 +26,10 @@ export function Header() {
   }
 
   return (
-    <header className={`sticky top-0 z-40 w-full transition-all duration-300 ${
+    <header className={`sticky top-0 z-40 w-full transition-all duration-300 border-b ${
       isScrolled 
-        ? 'bg-card/90 backdrop-blur-md shadow-md border-b border-border/50' 
-        : 'bg-muted/40 backdrop-blur-sm border-b border-border/10'
+        ? 'bg-white/95 backdrop-blur-md shadow-md border-border/50' 
+        : 'bg-white border-border/10'
     }`}>
       <div className="mx-auto max-w-7xl px-4 md:px-6 lg:px-8 flex h-16 items-center justify-between">
         {/* Logo: Always show on mobile. Show on desktop only if Sidebar is hidden (not authenticated) */}
