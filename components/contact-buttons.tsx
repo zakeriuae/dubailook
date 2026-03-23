@@ -38,7 +38,7 @@ export function ContactButtons({ ctas }: ContactButtonsProps) {
         const isUrl = cta.cta_type === 'url'
 
         let icon = <ExternalLink className="h-5 w-5" />
-        let bgClass = 'variant="outline"'
+        let bgClass = ''
         let href = cta.value
         let label = cta.label || 'Visit Website'
 

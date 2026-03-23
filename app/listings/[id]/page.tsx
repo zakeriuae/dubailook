@@ -8,14 +8,8 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { 
-  Building2, 
-  LandPlot, 
-  Briefcase, 
-  Package, 
-  Users, 
-  ArrowLeft, 
-  Calendar, 
-  Eye 
+  Building2, LandPlot, Briefcase, Package, Users, 
+  ArrowLeft, Calendar, Eye, Share2
 } from 'lucide-react'
 import { LISTING_TYPE_LABELS, LISTING_STATUS_LABELS } from '@/lib/types'
 import type { Listing } from '@/lib/types'
@@ -87,9 +81,22 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
   const user = listing.user
 
   return (
-    <div className="mx-auto">
-      <main className="py-2">
-        <Button variant="ghost" asChild className="mb-6">
+    <div className="relative pb-24 md:pb-0">
+      {/* Mobile-Only Header */}
+      <div className="sticky top-0 z-50 flex h-14 items-center justify-between border-b bg-background/80 px-4 backdrop-blur-md md:hidden">
+        <Button variant="ghost" size="icon" asChild className="h-9 w-9">
+          <Link href="/">
+            <ArrowLeft className="h-5 w-5" />
+          </Link>
+        </Button>
+        <span className="text-sm font-bold truncate max-w-[200px]">{listing.title}</span>
+        <Button variant="ghost" size="icon" className="h-9 w-9">
+          <Share2 className="h-5 w-5" />
+        </Button>
+      </div>
+
+      <main className="container mx-auto max-w-7xl md:py-8">
+        <Button variant="ghost" asChild className="mb-6 hidden md:inline-flex">
           <Link href="/">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Listings
@@ -99,7 +106,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         <div className="grid gap-8 lg:grid-cols-3">
           {/* Main Content */}
           <div className="lg:col-span-2">
-            <div className="relative aspect-video overflow-hidden rounded-xl bg-muted">
+            <div className="relative aspect-video overflow-hidden bg-muted md:rounded-xl">
               {listing.image_url ? (
                 <Image
                   src={listing.image_url}
@@ -112,21 +119,21 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                 <div className="flex h-full items-center justify-center">
                   {typeIcons[listing.listing_type]}
                   <span className="ml-2 text-lg text-muted-foreground">
-                    {LISTING_TYPE_LABELS[listing.listing_type as keyof typeof LISTING_TYPE_LABELS]}
+                    {LISTING_TYPE_LABELS[listing.listing_type]}
                   </span>
                 </div>
               )}
             </div>
 
-            <div className="mt-6">
+            <div className="mt-6 px-4 md:px-0">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge className="gap-1">
                   {typeIcons[listing.listing_type]}
-                  {LISTING_TYPE_LABELS[listing.listing_type as keyof typeof LISTING_TYPE_LABELS]}
+                  {LISTING_TYPE_LABELS[listing.listing_type]}
                 </Badge>
                 {listing.status !== 'published' && (
                   <Badge variant="outline">
-                    {LISTING_STATUS_LABELS[listing.status as keyof typeof LISTING_STATUS_LABELS]}
+                    {LISTING_STATUS_LABELS[listing.status]}
                   </Badge>
                 )}
               </div>
@@ -149,7 +156,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
               </div>
             </div>
 
-            <Card className="mt-6">
+            <Card className="mt-6 border-x-0 rounded-none md:border-x md:rounded-xl shadow-none md:shadow-sm">
               <CardContent className="pt-6">
                 <h2 className="mb-4 text-lg font-semibold">Description</h2>
                 <p className="whitespace-pre-wrap text-muted-foreground">{listing.description}</p>
@@ -157,16 +164,17 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
             </Card>
           </div>
 
-          <div className="space-y-6">
-            <Card>
+          <div className="space-y-6 px-4 md:px-0">
+            {/* Contact Card - Hidden on Mobile sticky footer covers it */}
+            <Card className="hidden md:block">
               <CardContent className="pt-6">
-                <h2 className="mb-4 text-lg font-semibold">Contact</h2>
+                <h2 className="mb-4 text-lg font-semibold">Contact Details</h2>
                 <ContactButtons ctas={listing.listing_cta || []} />
               </CardContent>
             </Card>
 
             {user && (
-              <Card>
+              <Card className="mb-8 md:mb-0">
                 <CardContent className="pt-6">
                   <h2 className="mb-4 text-lg font-semibold">Listed By</h2>
                   <div className="flex items-center gap-3">
@@ -189,6 +197,15 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
           </div>
         </div>
       </main>
+
+      {/* Mobile Sticky Footer */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card/95 p-4 backdrop-blur md:hidden">
+        <div className="mx-auto flex max-w-md items-center gap-3">
+          <div className="flex-1">
+            <ContactButtons ctas={listing.listing_cta || []} />
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
