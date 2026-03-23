@@ -8,8 +8,14 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { 
-  Building2, LandPlot, Briefcase, Package, Users, 
-  ArrowLeft, Calendar, Eye
+  Building2, 
+  LandPlot, 
+  Briefcase, 
+  Package, 
+  Users, 
+  ArrowLeft, 
+  Calendar, 
+  Eye 
 } from 'lucide-react'
 import { LISTING_TYPE_LABELS, LISTING_STATUS_LABELS } from '@/lib/types'
 import type { Listing } from '@/lib/types'
@@ -60,7 +66,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
       user:profiles (*)
     `)
     .eq('id', id)
-    .single() as { data: any | null }
+    .single() as { data: Listing | null }
   
   if (!listing) {
     notFound()
