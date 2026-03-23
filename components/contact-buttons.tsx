@@ -9,9 +9,10 @@ import { useRouter } from 'next/navigation'
 
 interface ContactButtonsProps {
   ctas: ListingCTA[]
+  variant?: 'stack' | 'row'
 }
 
-export function ContactButtons({ ctas }: ContactButtonsProps) {
+export function ContactButtons({ ctas, variant = 'stack' }: ContactButtonsProps) {
   const { isAuthenticated } = useAuth()
   const router = useRouter()
 
@@ -31,7 +32,7 @@ export function ContactButtons({ ctas }: ContactButtonsProps) {
   if (!ctas || ctas.length === 0) return null
 
   return (
-    <div className="space-y-3">
+    <div className={variant === 'row' ? "flex flex-row gap-2" : "space-y-3"}>
       {ctas.map((cta) => {
         const isWhatsapp = cta.cta_type === 'whatsapp'
         const isTelegram = cta.cta_type === 'telegram'
@@ -67,10 +68,11 @@ export function ContactButtons({ ctas }: ContactButtonsProps) {
               onClick={(e) => handleContactClick(e, cta)}
               target={isAuthenticated ? "_blank" : undefined}
               rel="noopener noreferrer"
+              className="flex items-center justify-center gap-1 overflow-hidden"
             >
-              {isAuthenticated ? icon : <Lock className="h-4 w-4 text-muted-foreground" />}
-              {label}
-              {!isAuthenticated && <span className="text-[10px] opacity-70 ml-1">(Login Required)</span>}
+              {isAuthenticated ? icon : <Lock className="h-4 w-4 text-muted-foreground mr-1" />}
+              <span className="truncate">{label.replace('Contact via ', '')}</span>
+              {!isAuthenticated && <span className="text-[10px] opacity-70 ml-1 hidden sm:inline">(Login)</span>}
             </a>
           </Button>
         )

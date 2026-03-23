@@ -198,11 +198,10 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         </div>
       </main>
 
-      {/* Mobile Sticky Footer */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card/95 p-4 backdrop-blur md:hidden">
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card/95 p-4 pb-safe backdrop-blur md:hidden">
         <div className="mx-auto flex max-w-md items-center gap-3">
           <div className="flex-1">
-            <ContactButtons ctas={listing.listing_cta || []} />
+            <ContactButtons ctas={listing.listing_cta || []} variant="row" />
           </div>
         </div>
       </div>
