@@ -47,15 +47,14 @@ export async function POST(request: NextRequest) {
       reason: reason || null,
     })
 
-    // If publishing OR approving, send to Telegram
-    if (action === 'publish' || action === 'approve') {
+    // If publishing OR approving OR reposting, send to Telegram
+    if (action === 'publish' || action === 'approve' || action === 'repost') {
       try {
-        // Use a relative URL or full URL if available
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (request.headers.get('origin') || '')
         await fetch(`${baseUrl}/api/telegram/publish`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ listingId }),
+          body: JSON.stringify({ listingId, force: action === 'repost' }),
         })
       } catch (e) {
         console.error('Failed to publish to Telegram:', e)

@@ -46,7 +46,7 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null)
   const [rejectReason, setRejectReason] = useState('')
 
-  const handleAction = async (listingId: string, action: 'approve' | 'reject' | 'publish', reason?: string) => {
+  const handleAction = async (listingId: string, action: 'approve' | 'reject' | 'publish' | 'repost', reason?: string) => {
     setIsLoading(listingId)
     try {
       const res = await fetch('/api/admin/listings', {
@@ -208,6 +208,23 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
                         Publish
                       </Button>
                     )}
+
+                    {listing.status === 'published' && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 gap-1 border-blue-200 px-2 text-blue-600 hover:bg-blue-50"
+                        onClick={() => handleAction(listing.id, 'repost')}
+                        disabled={isLoading === listing.id}
+                      >
+                        {isLoading === listing.id ? (
+                          <Spinner className="h-3 w-3" />
+                        ) : (
+                          <Send className="h-3 w-3" />
+                        )}
+                        <span className="hidden lg:inline">Repost</span>
+                      </Button>
+                    )}
                   </div>
                 </TableCell>
               </TableRow>
@@ -319,6 +336,23 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
                         <Send className="h-4 w-4" />
                       )}
                       Publish Now
+                    </Button>
+                  )}
+
+                  {listing.status === 'published' && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-9 gap-1.5 border-blue-200 text-blue-600 bg-blue-50/50"
+                      onClick={() => handleAction(listing.id, 'repost')}
+                      disabled={isLoading === listing.id}
+                    >
+                      {isLoading === listing.id ? (
+                        <Spinner className="h-4 w-4" />
+                      ) : (
+                        <Send className="h-4 w-4" />
+                      )}
+                      Repost
                     </Button>
                   )}
                 </div>

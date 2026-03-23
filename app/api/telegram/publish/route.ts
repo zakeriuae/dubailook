@@ -104,7 +104,7 @@ async function sendToTelegram(chatId: string | number, listing: Listing, ctas: L
 
 export async function POST(request: NextRequest) {
   try {
-    const { listingId } = await request.json()
+    const { listingId, force = false } = await request.json()
 
     if (!listingId) {
       return NextResponse.json({ error: 'Missing listingId' }, { status: 400 })
@@ -126,36 +126,38 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Listing not found' }, { status: 404 })
     }
 
-    // Check if already published to Telegram (prevent duplicates)
-    const { data: existingSchedule } = await supabase
-      .from('listing_schedules')
-      .select('telegram_message_id')
-      .eq('listing_id', listingId)
-      .not('telegram_message_id', 'is', null)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single()
-
-    // Only prevent duplicate if last schedule was completed
-    if (existingSchedule?.telegram_message_id) {
-      // Check if it was within the last hour to prevent rapid duplicates
-      const { data: recentSchedule } = await supabase
+    // Check if already published to Telegram (prevent duplicates) unless forced
+    if (!force) {
+      const { data: existingSchedule } = await supabase
         .from('listing_schedules')
-        .select('created_at')
+        .select('telegram_message_id')
         .eq('listing_id', listingId)
         .not('telegram_message_id', 'is', null)
         .order('created_at', { ascending: false })
         .limit(1)
         .single()
 
-      if (recentSchedule) {
-        const lastPublishTime = new Date(recentSchedule.created_at).getTime()
-        const oneHourAgo = Date.now() - 60 * 60 * 1000
-        if (lastPublishTime > oneHourAgo) {
-          return NextResponse.json({ 
-            error: 'Listing was already published recently', 
-            lastMessageId: existingSchedule.telegram_message_id 
-          }, { status: 429 })
+      // Only prevent duplicate if last schedule was completed
+      if (existingSchedule?.telegram_message_id) {
+        // Check if it was within the last hour to prevent rapid duplicates
+        const { data: recentSchedule } = await supabase
+          .from('listing_schedules')
+          .select('created_at')
+          .eq('listing_id', listingId)
+          .not('telegram_message_id', 'is', null)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single()
+
+        if (recentSchedule) {
+          const lastPublishTime = new Date(recentSchedule.created_at).getTime()
+          const oneHourAgo = Date.now() - 60 * 60 * 1000
+          if (lastPublishTime > oneHourAgo) {
+            return NextResponse.json({ 
+              error: 'Listing was already published recently', 
+              lastMessageId: existingSchedule.telegram_message_id 
+            }, { status: 429 })
+          }
         }
       }
     }

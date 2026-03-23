@@ -97,29 +97,29 @@ export function ListingCard({ listing, showStatus = false, showStats = false }: 
         </div>
       </Link>
       
-      <CardHeader className="pb-2">
+      <CardHeader className="p-3 pb-1">
         <Link href={`/listings/${listing.id}`}>
-          <h3 className="line-clamp-1 text-lg font-semibold transition-colors hover:text-primary">
+          <h3 className="line-clamp-1 text-base font-bold transition-colors hover:text-primary">
             {listing.title}
           </h3>
         </Link>
-        <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+        <div className="flex items-center gap-1 text-[10px] text-muted-foreground mt-0.5">
           <Clock className="h-3 w-3" />
           {formatRelativeDate(listing.created_at)}
         </div>
       </CardHeader>
       
-      <CardContent className="pb-3">
-        <p className="line-clamp-2 text-sm text-muted-foreground">{listing.description}</p>
+      <CardContent className="px-3 pb-2 pt-0">
+        <p className="line-clamp-2 text-xs text-muted-foreground leading-relaxed">{listing.description}</p>
         
         {showStats && listing.listing_stats && (
-          <div className="mt-3 flex items-center gap-4 text-sm text-muted-foreground">
+          <div className="mt-2 flex items-center gap-3 text-[10px] text-muted-foreground">
             <span className="flex items-center gap-1">
-              <Eye className="h-4 w-4" />
+              <Eye className="h-3 w-3" />
               {listing.listing_stats.page_views} views
             </span>
             <span className="flex items-center gap-1">
-              <Users className="h-4 w-4" />
+              <Users className="h-3 w-3" />
               {listing.listing_stats.list_impressions} impressions
             </span>
           </div>
@@ -127,7 +127,7 @@ export function ListingCard({ listing, showStatus = false, showStats = false }: 
       </CardContent>
       
       {listing.listing_cta && listing.listing_cta.length > 0 && (
-        <CardFooter className="flex flex-wrap gap-2 pt-0 pb-4">
+        <CardFooter className="flex flex-wrap gap-2 px-3 pb-3 pt-0">
           {listing.listing_cta.map((cta) => (
             <CTAButton key={cta.id} cta={cta} />
           ))}
