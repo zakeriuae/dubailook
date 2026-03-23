@@ -67,44 +67,44 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Listings</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-2 lg:grid-cols-4 md:gap-4">
+        <Card className="overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 pb-1 md:p-6 md:pb-2">
+            <CardTitle className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground md:text-sm md:normal-case md:tracking-normal">Total Listings</CardTitle>
+            <FileText className="h-3 w-3 text-muted-foreground md:h-4 md:w-4" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalListings}</div>
+          <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
+            <div className="text-xl font-bold md:text-2xl">{totalListings}</div>
           </CardContent>
         </Card>
         
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Views</CardTitle>
-            <Eye className="h-4 w-4 text-muted-foreground" />
+        <Card className="overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 pb-1 md:p-6 md:pb-2">
+            <CardTitle className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground md:text-sm md:normal-case md:tracking-normal">Total Views</CardTitle>
+            <Eye className="h-3 w-3 text-muted-foreground md:h-4 md:w-4" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalViews}</div>
+          <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
+            <div className="text-xl font-bold md:text-2xl">{totalViews}</div>
           </CardContent>
         </Card>
         
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Impressions</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+        <Card className="overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 pb-1 md:p-6 md:pb-2">
+            <CardTitle className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground md:text-sm md:normal-case md:tracking-normal">Impressions</CardTitle>
+            <Users className="h-3 w-3 text-muted-foreground md:h-4 md:w-4" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalImpressions}</div>
+          <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
+            <div className="text-xl font-bold md:text-2xl">{totalImpressions}</div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Published</CardTitle>
-            <Send className="h-4 w-4 text-muted-foreground" />
+        <Card className="overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 pb-1 md:p-6 md:pb-2">
+            <CardTitle className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground md:text-sm md:normal-case md:tracking-normal">Published</CardTitle>
+            <Send className="h-3 w-3 text-muted-foreground md:h-4 md:w-4" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{publishedListings}</div>
+          <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
+            <div className="text-xl font-bold md:text-2xl">{publishedListings}</div>
           </CardContent>
         </Card>
       </div>
