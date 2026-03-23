@@ -35,6 +35,9 @@ export const viewport: Viewport = {
   initialScale: 1,
 }
 
+import { AppLayout } from '@/components/app-layout'
+import { AuthProvider } from '@/lib/auth-context'
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -42,9 +45,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} antialiased`}>
-        {children}
-        <Toaster position="top-center" richColors />
+      <body className={`${inter.className} antialiased selection:bg-primary/10`}>
+        <AuthProvider initialProfile={null}>
+          <AppLayout>
+            {children}
+          </AppLayout>
+          <Toaster position="top-right" richColors closeButton />
+        </AuthProvider>
         <Analytics />
       </body>
     </html>

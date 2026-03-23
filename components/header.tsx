@@ -11,174 +11,131 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Home, LayoutDashboard, Shield, Plus, LogOut, User, Menu, X } from 'lucide-react'
+import { LayoutDashboard, Shield, LogOut, User, Menu, Bell } from 'lucide-react'
 import { useState } from 'react'
 
 export function Header() {
   const { profile, isAuthenticated, isAdmin, logout } = useAuth()
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
+
+  // Add scroll handler for glassmorphism effect if needed
+  if (typeof window !== 'undefined') {
+    window.addEventListener('scroll', () => {
+      setIsScrolled(window.scrollY > 20)
+    })
+  }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
+    <header className={`sticky top-0 z-40 w-full transition-all duration-300 ${
+      isScrolled ? 'bg-card/80 backdrop-blur-md shadow-sm border-b' : 'bg-transparent'
+    }`}>
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-            <Home className="h-4 w-4 text-primary-foreground" />
-          </div>
-          <span className="text-lg font-semibold text-foreground">RealEstate Hub</span>
-        </Link>
+        {/* Mobile: Show logo or title, Desktop: Empty space since logo is in sidebar */}
+        <div className="flex items-center gap-2 md:hidden">
+          <Link href="/" className="flex items-center gap-2">
+            <span className="text-xl font-bold tracking-tight text-primary">DubaiLook</span>
+          </Link>
+        </div>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden items-center gap-1 md:flex">
-          <Button variant="ghost" asChild>
-            <Link href="/">Listings</Link>
-          </Button>
+        <div className="hidden md:block">
+          {/* Dashboard Title or Search Bar could go here */}
+        </div>
+
+        {/* Right side: Notifications & Profile */}
+        <div className="flex items-center gap-2 lg:gap-4">
           {isAuthenticated && (
             <>
-              <Button variant="ghost" asChild>
-                <Link href="/dashboard">
-                  <LayoutDashboard className="mr-2 h-4 w-4" />
-                  Dashboard
-                </Link>
+              <Button variant="ghost" size="icon" className="rounded-full text-muted-foreground hover:text-foreground">
+                <Bell className="h-5 w-5" />
               </Button>
-              <Button variant="ghost" asChild>
-                <Link href="/listings/new">
-                  <Plus className="mr-2 h-4 w-4" />
-                  New Listing
-                </Link>
-              </Button>
-              {isAdmin && (
-                <Button variant="ghost" asChild>
-                  <Link href="/admin">
-                    <Shield className="mr-2 h-4 w-4" />
-                    Admin
-                  </Link>
-                </Button>
-              )}
-            </>
-          )}
-        </nav>
 
-        {/* Desktop User Menu */}
-        <div className="hidden items-center gap-4 md:flex">
-          {isAuthenticated && profile ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={profile.photo_url || undefined} alt={profile.first_name || 'User'} />
-                    <AvatarFallback className="bg-primary text-primary-foreground">
-                      {profile.first_name?.[0] || 'U'}
-                    </AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end">
-                <div className="flex items-center justify-start gap-2 p-2">
-                  <div className="flex flex-col space-y-1 leading-none">
-                    <p className="font-medium">{profile.first_name} {profile.last_name}</p>
-                    {profile.telegram_username && (
-                      <p className="text-sm text-muted-foreground">@{profile.telegram_username}</p>
-                    )}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative flex items-center gap-2 rounded-full border border-border p-1 pr-3 hover:bg-muted/50">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={profile?.photo_url || undefined} alt="Profile" />
+                      <AvatarFallback className="bg-primary text-primary-foreground">
+                        {profile?.first_name?.[0] || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="hidden text-sm font-medium lg:inline-block">
+                      {profile?.first_name || 'My Account'}
+                    </span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-64 p-2" align="end">
+                  <div className="flex items-center gap-3 p-3">
+                    <Avatar className="h-12 w-12">
+                      <AvatarImage src={profile?.photo_url || undefined} />
+                      <AvatarFallback className="bg-primary text-primary-foreground text-xl">
+                        {profile?.first_name?.[0]}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col">
+                      <p className="font-bold text-foreground">
+                        {profile?.first_name} {profile?.last_name}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        @{profile?.telegram_username || 'user'}
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/profile">
-                    <User className="mr-2 h-4 w-4" />
-                    Profile
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/dashboard">
-                    <LayoutDashboard className="mr-2 h-4 w-4" />
-                    Dashboard
-                  </Link>
-                </DropdownMenuItem>
-                {isAdmin && (
-                  <DropdownMenuItem asChild>
-                    <Link href="/admin">
-                      <Shield className="mr-2 h-4 w-4" />
-                      Admin Panel
+                  <DropdownMenuSeparator className="my-2" />
+                  
+                  <DropdownMenuItem asChild className="rounded-lg p-2.5 cursor-pointer">
+                    <Link href="/dashboard" className="flex items-center gap-3">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600">
+                        <LayoutDashboard className="h-4 w-4" />
+                      </div>
+                      <span className="font-medium">Dashboard</span>
                     </Link>
                   </DropdownMenuItem>
-                )}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={logout} className="text-destructive">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Log out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <Button asChild>
-              <Link href="/login">Login with Telegram</Link>
+
+                  <DropdownMenuItem asChild className="rounded-lg p-2.5 cursor-pointer">
+                    <Link href="/profile" className="flex items-center gap-3">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-600">
+                        <User className="h-4 w-4" />
+                      </div>
+                      <span className="font-medium">My Profile</span>
+                    </Link>
+                  </DropdownMenuItem>
+
+                  {isAdmin && (
+                    <DropdownMenuItem asChild className="rounded-lg p-2.5 cursor-pointer text-amber-600">
+                      <Link href="/admin" className="flex items-center gap-3">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10">
+                          <Shield className="h-4 w-4" />
+                        </div>
+                        <span className="font-medium text-foreground">Admin Panel</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+
+                  <DropdownMenuSeparator className="my-2" />
+                  
+                  <DropdownMenuItem 
+                    onClick={logout} 
+                    className="rounded-lg p-2.5 cursor-pointer text-destructive hover:bg-destructive/10 focus:bg-destructive/10"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-destructive/10">
+                        <LogOut className="h-4 w-4" />
+                      </div>
+                      <span className="font-medium">Log out</span>
+                    </div>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
+          )}
+
+          {!isAuthenticated && (
+            <Button asChild className="rounded-full shadow-lg shadow-primary/20">
+              <Link href="/login">Login</Link>
             </Button>
           )}
         </div>
-
-        {/* Mobile Menu Button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="md:hidden"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        >
-          {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </Button>
       </div>
-
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <div className="border-t border-border bg-card md:hidden">
-          <nav className="container mx-auto flex flex-col gap-1 p-4">
-            <Button variant="ghost" asChild className="justify-start" onClick={() => setMobileMenuOpen(false)}>
-              <Link href="/">
-                <Home className="mr-2 h-4 w-4" />
-                Listings
-              </Link>
-            </Button>
-            {isAuthenticated ? (
-              <>
-                <Button variant="ghost" asChild className="justify-start" onClick={() => setMobileMenuOpen(false)}>
-                  <Link href="/dashboard">
-                    <LayoutDashboard className="mr-2 h-4 w-4" />
-                    Dashboard
-                  </Link>
-                </Button>
-                <Button variant="ghost" asChild className="justify-start" onClick={() => setMobileMenuOpen(false)}>
-                  <Link href="/listings/new">
-                    <Plus className="mr-2 h-4 w-4" />
-                    New Listing
-                  </Link>
-                </Button>
-                <Button variant="ghost" asChild className="justify-start" onClick={() => setMobileMenuOpen(false)}>
-                  <Link href="/profile">
-                    <User className="mr-2 h-4 w-4" />
-                    Profile
-                  </Link>
-                </Button>
-                {isAdmin && (
-                  <Button variant="ghost" asChild className="justify-start" onClick={() => setMobileMenuOpen(false)}>
-                    <Link href="/admin">
-                      <Shield className="mr-2 h-4 w-4" />
-                      Admin Panel
-                    </Link>
-                  </Button>
-                )}
-                <Button variant="ghost" className="justify-start text-destructive" onClick={logout}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Log out
-                </Button>
-              </>
-            ) : (
-              <Button asChild className="mt-2">
-                <Link href="/login">Login with Telegram</Link>
-              </Button>
-            )}
-          </nav>
-        </div>
-      )}
     </header>
   )
 }

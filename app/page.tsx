@@ -26,26 +26,21 @@ export default async function HomePage() {
     .order('created_at', { ascending: false })
 
   return (
-    <AuthProvider initialProfile={profile}>
-      <div className="min-h-screen bg-background">
-        <Header />
-        <main className="container mx-auto px-4 py-8">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-              Property Listings
-            </h1>
-            <p className="mt-2 text-muted-foreground">
-              Browse our latest properties, land, and real estate projects
-            </p>
-          </div>
-          
-          <Suspense fallback={<div className="flex justify-center py-4"><Spinner /></div>}>
-            <ListingsFilters />
-          </Suspense>
-          
-          <ListingsGrid listings={listings || []} />
-        </main>
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">
+          Property Listings
+        </h1>
+        <p className="mt-2 text-muted-foreground">
+          Browse our latest properties, land, and real estate projects
+        </p>
       </div>
-    </AuthProvider>
+      
+      <Suspense fallback={<div className="flex justify-center py-4"><Spinner /></div>}>
+        <ListingsFilters />
+      </Suspense>
+      
+      <ListingsGrid listings={listings || []} />
+    </div>
   )
 }
