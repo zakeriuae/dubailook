@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button'
 import { Building2, LandPlot, Briefcase, Package, Users, Eye, MessageCircle, ExternalLink, Phone } from 'lucide-react'
 import type { Listing, ListingCTA } from '@/lib/types'
 import { LISTING_TYPE_LABELS, LISTING_STATUS_LABELS } from '@/lib/types'
+import { formatRelativeDate } from '@/lib/utils'
+import { Clock } from 'lucide-react'
 
 interface ListingCardProps {
   listing: Listing
@@ -99,6 +101,10 @@ export function ListingCard({ listing, showStatus = false, showStats = false }: 
             {listing.title}
           </h3>
         </Link>
+        <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+          <Clock className="h-3 w-3" />
+          {formatRelativeDate(listing.created_at)}
+        </div>
       </CardHeader>
       
       <CardContent className="pb-3">

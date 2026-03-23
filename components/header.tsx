@@ -27,7 +27,9 @@ export function Header() {
 
   return (
     <header className={`sticky top-0 z-40 w-full transition-all duration-300 ${
-      isScrolled ? 'bg-card/80 backdrop-blur-md shadow-sm border-b' : 'bg-transparent'
+      isScrolled 
+        ? 'bg-card/90 backdrop-blur-md shadow-md border-b border-border/50' 
+        : 'bg-muted/40 backdrop-blur-sm border-b border-border/10'
     }`}>
       <div className="mx-auto max-w-7xl px-4 md:px-6 lg:px-8 flex h-16 items-center justify-between">
         {/* Logo: Always show on mobile. Show on desktop only if Sidebar is hidden (not authenticated) */}
