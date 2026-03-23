@@ -29,7 +29,7 @@ export function Header() {
     <header className={`sticky top-0 z-40 w-full transition-all duration-300 ${
       isScrolled ? 'bg-card/80 backdrop-blur-md shadow-sm border-b' : 'bg-transparent'
     }`}>
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
+      <div className="mx-auto max-w-7xl px-4 md:px-6 lg:px-8 flex h-16 items-center justify-between">
         {/* Logo: Always show on mobile. Show on desktop only if Sidebar is hidden (not authenticated) */}
         <div className={`flex items-center gap-2 ${isAuthenticated ? 'md:hidden' : ''}`}>
           <Link href="/" className="flex items-center gap-2">
