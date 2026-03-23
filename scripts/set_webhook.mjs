@@ -1,20 +1,25 @@
-import fetch from 'node-fetch';
-import dotenv from 'dotenv';
+import fs from 'fs';
 import readline from 'readline';
 
-dotenv.config({ path: '.env.local' });
-
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
-
-const token = process.env.TELEGRAM_BOT_TOKEN;
+// Manual .env.local parsing to avoid 'dotenv' dependency
+let token = '';
+try {
+  const envContent = fs.readFileSync('.env.local', 'utf8');
+  const match = envContent.match(/TELEGRAM_BOT_TOKEN=["']?([^"'\s]+)["']?/);
+  if (match) token = match[1];
+} catch (e) {
+  console.error('Could not read .env.local');
+}
 
 if (!token) {
   console.error('TELEGRAM_BOT_TOKEN missing in .env.local');
   process.exit(1);
 }
+
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
 
 rl.question('Please enter your public localtunnel URL (e.g., https://your-subdomain.loca.lt): ', async (url) => {
   if (!url) {

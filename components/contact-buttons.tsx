@@ -32,7 +32,10 @@ export function ContactButtons({ ctas, variant = 'stack' }: ContactButtonsProps)
   if (!ctas || ctas.length === 0) return null
 
   return (
-    <div className={variant === 'row' ? "flex flex-row gap-2" : "space-y-3"}>
+    <div className={variant === 'row' 
+      ? `grid gap-2 ${ctas.length === 1 ? 'grid-cols-1' : ctas.length === 2 ? 'grid-cols-2' : 'grid-cols-3'}` 
+      : "space-y-3"
+    }>
       {ctas.map((cta) => {
         const isWhatsapp = cta.cta_type === 'whatsapp'
         const isTelegram = cta.cta_type === 'telegram'
@@ -41,26 +44,26 @@ export function ContactButtons({ ctas, variant = 'stack' }: ContactButtonsProps)
         let icon = <ExternalLink className="h-5 w-5" />
         let bgClass = ''
         let href = cta.value
-        let label = cta.label || 'Visit Website'
+        let label = cta.label || (variant === 'row' ? 'Link' : 'Visit Website')
 
         if (isWhatsapp) {
           icon = <Phone className="h-5 w-5" />
-          bgClass = 'bg-green-600 hover:bg-green-700 text-white'
+          bgClass = 'bg-[#25D366] hover:bg-[#20bd5c] text-white' // Premium WA Green
           href = `https://wa.me/${cta.value.replace(/\D/g, '')}`
-          label = 'Contact via WhatsApp'
+          label = variant === 'row' ? 'WhatsApp' : 'Contact via WhatsApp'
         } else if (isTelegram) {
           icon = <MessageCircle className="h-5 w-5" />
-          bgClass = 'bg-[#0088cc] hover:bg-[#0088cc]/90 text-white'
+          bgClass = 'bg-[#0088cc] hover:bg-[#0077b3] text-white'
           href = `https://t.me/${cta.value.replace('@', '')}`
-          label = 'Contact via Telegram'
+          label = variant === 'row' ? 'Telegram' : 'Contact via Telegram'
         }
 
         return (
           <Button
             key={cta.id}
-            size="lg"
+            size={variant === 'row' ? 'md' : 'lg'}
             variant={isUrl || !isAuthenticated ? 'outline' : 'default'}
-            className={`w-full gap-2 ${isAuthenticated ? (isWhatsapp || isTelegram ? bgClass : '') : 'border-dashed'}`}
+            className={`w-full h-12 gap-2 shadow-sm ${isAuthenticated ? (isWhatsapp || isTelegram ? bgClass : '') : 'border-dashed'}`}
             asChild
           >
             <a 
@@ -68,11 +71,12 @@ export function ContactButtons({ ctas, variant = 'stack' }: ContactButtonsProps)
               onClick={(e) => handleContactClick(e, cta)}
               target={isAuthenticated ? "_blank" : undefined}
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-1 overflow-hidden"
+              className="flex items-center justify-center transition-transform active:scale-95"
             >
-              {isAuthenticated ? icon : <Lock className="h-4 w-4 text-muted-foreground mr-1" />}
-              <span className="truncate">{label.replace('Contact via ', '')}</span>
-              {!isAuthenticated && <span className="text-[10px] opacity-70 ml-1 hidden sm:inline">(Login)</span>}
+              <div className="flex items-center gap-2">
+                {isAuthenticated ? icon : <Lock className="h-4 w-4 text-muted-foreground" />}
+                <span className="font-semibold">{label.replace('Contact via ', '')}</span>
+              </div>
             </a>
           </Button>
         )
