@@ -4,11 +4,10 @@ import type { Listing, ListingCTA } from '@/lib/types'
 import { LISTING_TYPE_LABELS } from '@/lib/types'
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
-const TELEGRAM_CHANNEL_ID = process.env.TELEGRAM_CHANNEL_ID
 
-async function sendToTelegram(listing: Listing, ctas: ListingCTA[]): Promise<number | null> {
-  if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHANNEL_ID) {
-    console.error('Telegram credentials not configured')
+async function sendToTelegram(chatId: string | number, listing: Listing, ctas: ListingCTA[]): Promise<number | null> {
+  if (!TELEGRAM_BOT_TOKEN) {
+    console.error('Telegram bot token not configured')
     return null
   }
 
@@ -39,7 +38,7 @@ async function sendToTelegram(listing: Listing, ctas: ListingCTA[]): Promise<num
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          chat_id: TELEGRAM_CHANNEL_ID,
+          chat_id: chatId,
           photo: listing.image_url,
           caption: message,
           parse_mode: 'Markdown',
@@ -58,7 +57,7 @@ async function sendToTelegram(listing: Listing, ctas: ListingCTA[]): Promise<num
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        chat_id: TELEGRAM_CHANNEL_ID,
+        chat_id: chatId,
         text: message,
         parse_mode: 'Markdown',
         disable_web_page_preview: false,
@@ -135,16 +134,42 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Send to Telegram
-    const messageId = await sendToTelegram(listing, listing.listing_cta || [])
+    // Fetch all active channels
+    const { data: channels } = await supabase
+      .from('telegram_channels')
+      .select('chat_id')
+      .eq('is_active', true)
 
-    if (messageId) {
-      // Record the schedule
+    // Fallback to environment variable channel if no channels in DB
+    const activeChannelIds: (string | number)[] = channels?.map((c: { chat_id: string | number }) => c.chat_id) || []
+    const envChannelId = process.env.TELEGRAM_CHANNEL_ID
+    if (envChannelId && !activeChannelIds.includes(envChannelId)) {
+      activeChannelIds.push(envChannelId)
+    }
+
+    if (activeChannelIds.length === 0) {
+      return NextResponse.json({ error: 'No active Telegram channels configured' }, { status: 500 })
+    }
+
+    // Broadcast to all channels
+    let successCount = 0
+    let lastMessageId = null
+
+    for (const chatId of activeChannelIds) {
+      const messageId = await sendToTelegram(chatId, listing, listing.listing_cta || [])
+      if (messageId) {
+        successCount++
+        lastMessageId = messageId
+      }
+    }
+
+    if (successCount > 0) {
+      // Record the schedule (at least one was successful)
       await supabase.from('listing_schedules').insert({
         listing_id: listingId,
         scheduled_at: new Date().toISOString(),
         published_at: new Date().toISOString(),
-        telegram_message_id: messageId,
+        telegram_message_id: lastMessageId, // Store the last one for reference
         is_completed: true,
       })
 
@@ -168,8 +193,10 @@ export async function POST(request: NextRequest) {
           .eq('id', stats.id)
       }
 
-      return NextResponse.json({ success: true, messageId })
+      return NextResponse.json({ success: true, broadcastCount: successCount })
     }
+
+    return NextResponse.json({ error: 'Failed to broadcast to any Telegram channel' }, { status: 500 })
 
     return NextResponse.json({ error: 'Failed to send to Telegram' }, { status: 500 })
   } catch (error) {
