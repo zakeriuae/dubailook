@@ -87,11 +87,12 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
 
   return (
     <>
-      <div className="overflow-x-auto">
+      {/* Desktop Table View */}
+      <div className="hidden border-t md:block">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Listing</TableHead>
+              <TableHead className="w-[300px]">Listing</TableHead>
               <TableHead>Type</TableHead>
               <TableHead>Owner</TableHead>
               <TableHead>Stats</TableHead>
@@ -104,7 +105,7 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
               <TableRow key={listing.id}>
                 <TableCell>
                   <div className="flex items-center gap-3">
-                    <div className="relative h-12 w-12 overflow-hidden rounded-lg bg-muted">
+                    <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-muted">
                       {listing.image_url ? (
                         <Image
                           src={listing.image_url}
@@ -113,49 +114,49 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
                           className="object-cover"
                         />
                       ) : (
-                        <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
+                        <div className="flex h-full items-center justify-center text-[10px] text-muted-foreground text-center px-1">
                           No img
                         </div>
                       )}
                     </div>
-                    <div className="max-w-[200px]">
-                      <p className="truncate font-medium">{listing.title}</p>
-                      <p className="truncate text-sm text-muted-foreground">
-                        {listing.description.slice(0, 50)}...
+                    <div className="min-w-0">
+                      <p className="truncate font-medium text-sm">{listing.title}</p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {listing.description.slice(0, 40)}...
                       </p>
                     </div>
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Badge variant="outline">
+                  <Badge variant="outline" className="text-[10px] py-0 h-5">
                     {LISTING_TYPE_LABELS[listing.listing_type]}
                   </Badge>
                 </TableCell>
                 <TableCell>
                   {listing.user && (
                     <div className="flex items-center gap-2">
-                      <Avatar className="h-8 w-8">
+                      <Avatar className="h-6 w-6">
                         <AvatarImage src={listing.user.photo_url || undefined} />
-                        <AvatarFallback className="text-xs">
+                        <AvatarFallback className="text-[10px]">
                           {listing.user.first_name?.[0] || 'U'}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-sm">{listing.user.first_name}</span>
+                      <span className="text-xs truncate max-w-[80px]">{listing.user.first_name}</span>
                     </div>
                   )}
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Eye className="h-4 w-4" />
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Eye className="h-3 w-3" />
                     {listing.listing_stats?.page_views || 0}
                   </div>
                 </TableCell>
-                <TableCell className="text-sm text-muted-foreground">
+                <TableCell className="text-xs text-muted-foreground">
                   {new Date(listing.created_at).toLocaleDateString()}
                 </TableCell>
                 <TableCell className="text-right">
-                  <div className="flex items-center justify-end gap-2">
-                    <Button size="sm" variant="ghost" asChild>
+                  <div className="flex items-center justify-end gap-1.5">
+                    <Button size="sm" variant="ghost" className="h-8 w-8 p-0" asChild>
                       <Link href={`/listings/${listing.id}`}>
                         <ExternalLink className="h-4 w-4" />
                       </Link>
@@ -166,7 +167,7 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
                         <Button
                           size="sm"
                           variant="outline"
-                          className="gap-1 border-emerald-200 text-emerald-600 hover:bg-emerald-50"
+                          className="h-8 gap-1 border-emerald-200 px-2 text-emerald-600 hover:bg-emerald-50"
                           onClick={() => handleAction(listing.id, 'approve')}
                           disabled={isLoading === listing.id}
                         >
@@ -175,17 +176,17 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
                           ) : (
                             <CheckCircle className="h-4 w-4" />
                           )}
-                          Approve
+                          <span className="hidden lg:inline">Approve</span>
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
-                          className="gap-1 border-red-200 text-red-600 hover:bg-red-50"
+                          className="h-8 gap-1 border-red-200 px-2 text-red-600 hover:bg-red-50"
                           onClick={() => openRejectDialog(listing)}
                           disabled={isLoading === listing.id}
                         >
                           <XCircle className="h-4 w-4" />
-                          Reject
+                          <span className="hidden lg:inline">Reject</span>
                         </Button>
                       </>
                     )}
@@ -193,7 +194,7 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
                     {showPublishAction && (
                       <Button
                         size="sm"
-                        className="gap-1"
+                        className="h-8 gap-1 px-3"
                         onClick={() => handleAction(listing.id, 'publish')}
                         disabled={isLoading === listing.id}
                       >
@@ -211,6 +212,118 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
             ))}
           </TableBody>
         </Table>
+      </div>
+
+      {/* Mobile Card List View */}
+      <div className="space-y-4 md:hidden">
+        {listings.map((listing) => (
+          <Card key={listing.id} className="overflow-hidden border-none shadow-sm ring-1 ring-border">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-muted">
+                  {listing.image_url ? (
+                    <Image
+                      src={listing.image_url}
+                      alt={listing.title}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-[10px] text-muted-foreground text-center px-1">
+                      No image
+                    </div>
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="font-bold text-sm leading-tight text-foreground line-clamp-2">
+                      {listing.title}
+                    </p>
+                    <Badge variant="outline" className="shrink-0 text-[10px] uppercase font-bold tracking-tighter scale-90 origin-top-right">
+                      {LISTING_TYPE_LABELS[listing.listing_type]}
+                    </Badge>
+                  </div>
+                  
+                  <div className="mt-2 flex items-center gap-3">
+                    {listing.user && (
+                      <div className="flex items-center gap-1.5">
+                        <Avatar className="h-5 w-5">
+                          <AvatarImage src={listing.user.photo_url || undefined} />
+                          <AvatarFallback className="text-[8px]">{listing.user.first_name?.[0]}</AvatarFallback>
+                        </Avatar>
+                        <span className="text-[11px] text-muted-foreground font-medium">{listing.user.first_name}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                      <Eye className="h-3 w-3" />
+                      {listing.listing_stats?.page_views || 0}
+                    </div>
+                    <div className="text-[11px] text-muted-foreground ml-auto">
+                      {new Date(listing.created_at).toLocaleDateString()}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Mobile Actions */}
+              <div className="mt-4 flex items-center justify-between gap-2 border-t pt-3">
+                <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-blue-600" asChild>
+                  <Link href={`/listings/${listing.id}`}>
+                    <ExternalLink className="h-4 w-4" />
+                    Details
+                  </Link>
+                </Button>
+
+                <div className="flex items-center gap-2">
+                  {showActions && (
+                    <>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-9 gap-1.5 border-emerald-200 text-emerald-600 bg-emerald-50/50"
+                        onClick={() => handleAction(listing.id, 'approve')}
+                        disabled={isLoading === listing.id}
+                      >
+                        {isLoading === listing.id ? (
+                          <Spinner className="h-4 w-4" />
+                        ) : (
+                          <CheckCircle className="h-4 w-4" />
+                        )}
+                        Approve
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-9 gap-1.5 border-red-200 text-red-600 bg-red-50/50"
+                        onClick={() => openRejectDialog(listing)}
+                        disabled={isLoading === listing.id}
+                      >
+                        <XCircle className="h-4 w-4" />
+                        Reject
+                      </Button>
+                    </>
+                  )}
+
+                  {showPublishAction && (
+                    <Button
+                      size="sm"
+                      className="h-9 gap-1.5 px-4"
+                      onClick={() => handleAction(listing.id, 'publish')}
+                      disabled={isLoading === listing.id}
+                    >
+                      {isLoading === listing.id ? (
+                        <Spinner className="h-4 w-4" />
+                      ) : (
+                        <Send className="h-4 w-4" />
+                      )}
+                      Publish Now
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       {/* Reject Dialog */}

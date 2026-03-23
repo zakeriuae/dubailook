@@ -46,80 +46,80 @@ export default async function AdminPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-5 md:gap-4">
+        <Card className="overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 pb-1 md:p-6 md:pb-2">
+            <CardTitle className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground md:text-sm md:normal-case md:tracking-normal">Total</CardTitle>
+            <FileText className="h-3 w-3 text-muted-foreground md:h-4 md:w-4" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalListings}</div>
+          <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
+            <div className="text-xl font-bold md:text-2xl">{totalListings}</div>
           </CardContent>
         </Card>
         
-        <Card className="border-amber-200 bg-amber-50/50">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-amber-700">Pending</CardTitle>
-            <Clock className="h-4 w-4 text-amber-500" />
+        <Card className="overflow-hidden border-amber-200 bg-amber-50/30">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 pb-1 md:p-6 md:pb-2">
+            <CardTitle className="text-[10px] font-medium uppercase tracking-wider text-amber-700 md:text-sm md:normal-case md:tracking-normal">Pending</CardTitle>
+            <Clock className="h-3 w-3 text-amber-500 md:h-4 md:w-4" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-amber-700">{pendingListings.length}</div>
+          <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
+            <div className="text-xl font-bold text-amber-700 md:text-2xl">{pendingListings.length}</div>
           </CardContent>
         </Card>
         
-        <Card className="border-emerald-200 bg-emerald-50/50">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-emerald-700">Approved</CardTitle>
-            <CheckCircle className="h-4 w-4 text-emerald-500" />
+        <Card className="overflow-hidden border-emerald-200 bg-emerald-50/30">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 pb-1 md:p-6 md:pb-2">
+            <CardTitle className="text-[10px] font-medium uppercase tracking-wider text-emerald-700 md:text-sm md:normal-case md:tracking-normal">Approved</CardTitle>
+            <CheckCircle className="h-3 w-3 text-emerald-500 md:h-4 md:w-4" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-emerald-700">{approvedListings.length}</div>
+          <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
+            <div className="text-xl font-bold text-emerald-700 md:text-2xl">{approvedListings.length}</div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Views</CardTitle>
-            <Eye className="h-4 w-4 text-muted-foreground" />
+        <Card className="overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 pb-1 md:p-6 md:pb-2">
+            <CardTitle className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground md:text-sm md:normal-case md:tracking-normal">Views</CardTitle>
+            <Eye className="h-3 w-3 text-muted-foreground md:h-4 md:w-4" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalViews}</div>
+          <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
+            <div className="text-xl font-bold md:text-2xl">{totalViews}</div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Impressions</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+        <Card className="hidden lg:block overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 pb-1 md:p-6 md:pb-2">
+            <CardTitle className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground md:text-sm md:normal-case md:tracking-normal">Impressions</CardTitle>
+            <Users className="h-3 w-3 text-muted-foreground md:h-4 md:w-4" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalImpressions}</div>
+          <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
+            <div className="text-xl font-bold md:text-2xl">{totalImpressions}</div>
           </CardContent>
         </Card>
       </div>
 
       {/* Listings Tabs */}
-      <Tabs defaultValue="pending" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:grid-cols-none">
-          <TabsTrigger value="pending" className="gap-2">
-            <Clock className="h-4 w-4" />
-            <span className="hidden sm:inline">Pending</span>
-            <Badge variant="secondary" className="ml-1">{pendingListings.length}</Badge>
+      <Tabs defaultValue="pending" className="space-y-6">
+        <TabsList className="grid h-auto w-full grid-cols-2 gap-2 bg-transparent p-0 lg:flex lg:w-auto lg:grid-cols-none lg:bg-muted lg:p-1">
+          <TabsTrigger value="pending" className="flex items-center justify-center gap-2 rounded-lg border bg-card py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground lg:border-none lg:bg-transparent lg:py-1.5">
+            <Clock className="h-4 w-4 shrink-0" />
+            <span className="text-xs font-medium sm:text-sm">Pending</span>
+            <Badge variant="secondary" className="ml-0.5 h-5 px-1.5 text-[10px]">{pendingListings.length}</Badge>
           </TabsTrigger>
-          <TabsTrigger value="approved" className="gap-2">
-            <CheckCircle className="h-4 w-4" />
-            <span className="hidden sm:inline">Approved</span>
-            <Badge variant="secondary" className="ml-1">{approvedListings.length}</Badge>
+          <TabsTrigger value="approved" className="flex items-center justify-center gap-2 rounded-lg border bg-card py-2.5 data-[state=active]:bg-emerald-600 data-[state=active]:text-white lg:border-none lg:bg-transparent lg:py-1.5">
+            <CheckCircle className="h-4 w-4 shrink-0" />
+            <span className="text-xs font-medium sm:text-sm">Approved</span>
+            <Badge variant="secondary" className="ml-0.5 h-5 px-1.5 text-[10px]">{approvedListings.length}</Badge>
           </TabsTrigger>
-          <TabsTrigger value="published" className="gap-2">
-            <Send className="h-4 w-4" />
-            <span className="hidden sm:inline">Published</span>
-            <Badge variant="secondary" className="ml-1">{publishedListings.length}</Badge>
+          <TabsTrigger value="published" className="flex items-center justify-center gap-2 rounded-lg border bg-card py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground lg:border-none lg:bg-transparent lg:py-1.5">
+            <Send className="h-4 w-4 shrink-0" />
+            <span className="text-xs font-medium sm:text-sm">Published</span>
+            <Badge variant="secondary" className="ml-0.5 h-5 px-1.5 text-[10px]">{publishedListings.length}</Badge>
           </TabsTrigger>
-          <TabsTrigger value="rejected" className="gap-2">
-            <XCircle className="h-4 w-4" />
-            <span className="hidden sm:inline">Rejected</span>
-            <Badge variant="secondary" className="ml-1">{rejectedListings.length}</Badge>
+          <TabsTrigger value="rejected" className="flex items-center justify-center gap-2 rounded-lg border bg-card py-2.5 data-[state=active]:bg-destructive data-[state=active]:text-destructive-foreground lg:border-none lg:bg-transparent lg:py-1.5">
+            <XCircle className="h-4 w-4 shrink-0" />
+            <span className="text-xs font-medium sm:text-sm">Rejected</span>
+            <Badge variant="secondary" className="ml-0.5 h-5 px-1.5 text-[10px]">{rejectedListings.length}</Badge>
           </TabsTrigger>
         </TabsList>
 
