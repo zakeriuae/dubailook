@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     let newStatus: string
     switch (action) {
       case 'approve':
-        newStatus = 'approved'
+        newStatus = 'published'
         break
       case 'reject':
         newStatus = 'rejected'

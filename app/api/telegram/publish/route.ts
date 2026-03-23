@@ -17,19 +17,36 @@ async function sendToTelegram(chatId: string | number, listing: Listing, ctas: L
   message += `📍 Type: ${typeLabel}\n\n`
   message += `${listing.description}\n\n`
   
-  // Add CTAs
-  message += '📞 Contact:\n'
+  // Prepare inline buttons
+  const buttons = []
+  
   for (const cta of ctas) {
     if (cta.cta_type === 'whatsapp') {
-      message += `• WhatsApp: [${cta.value}](https://wa.me/${cta.value.replace(/\D/g, '')})\n`
+      buttons.push([{ 
+        text: '💬 WhatsApp', 
+        url: `https://wa.me/${cta.value.replace(/\D/g, '')}` 
+      }])
     } else if (cta.cta_type === 'telegram') {
-      message += `• Telegram: [@${cta.value.replace('@', '')}](https://t.me/${cta.value.replace('@', '')})\n`
+      const username = cta.value.replace('@', '')
+      buttons.push([{ 
+        text: '✈️ Telegram', 
+        url: `https://t.me/${username}` 
+      }])
     } else if (cta.cta_type === 'url') {
-      message += `• [${cta.label || 'Visit'}](${cta.value})\n`
+      buttons.push([{ 
+        text: `🔗 ${cta.label || 'Website'}`, 
+        url: cta.value 
+      }])
     }
   }
 
-  message += `\n🔗 [View Details](${process.env.NEXT_PUBLIC_APP_URL}/listings/${listing.id})`
+  // Add View Details button
+  buttons.push([{ 
+    text: '👁️ View on Web', 
+    url: `${process.env.NEXT_PUBLIC_APP_URL}/listings/${listing.id}` 
+  }])
+
+  const reply_markup = { inline_keyboard: buttons }
 
   try {
     // If there's an image, send photo with caption
@@ -42,6 +59,7 @@ async function sendToTelegram(chatId: string | number, listing: Listing, ctas: L
           photo: listing.image_url,
           caption: message,
           parse_mode: 'Markdown',
+          reply_markup,
         }),
       })
 
@@ -60,6 +78,7 @@ async function sendToTelegram(chatId: string | number, listing: Listing, ctas: L
         chat_id: chatId,
         text: message,
         parse_mode: 'Markdown',
+        reply_markup,
         disable_web_page_preview: false,
       }),
     })

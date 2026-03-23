@@ -108,7 +108,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
           </Button>
         </div>
 
-        <div className="grid gap-0 md:gap-8 lg:grid-cols-3">
+        <div className="grid gap-6 md:gap-8 lg:grid-cols-3">
           {/* Main Content */}
           <div className="lg:col-span-2">
             <div className="relative aspect-video overflow-hidden bg-transparent md:rounded-xl md:bg-muted">
@@ -162,14 +162,14 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
             </div>
 
             <Card className="mt-6 border-x-0 rounded-none md:border-x md:rounded-xl shadow-none md:shadow-sm">
-              <CardContent className="pt-6">
+              <CardContent className="pt-4 md:pt-6">
                 <h2 className="mb-4 text-lg font-semibold">Description</h2>
                 <p className="whitespace-pre-wrap text-muted-foreground">{listing.description}</p>
               </CardContent>
             </Card>
           </div>
 
-          <div className="space-y-6 px-0 md:px-0">
+          <div className="space-y-6 px-4 md:px-0">
             {/* Contact Card - Hidden on Mobile sticky footer covers it */}
             <Card className="hidden md:block">
               <CardContent className="pt-6">
@@ -179,8 +179,8 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
             </Card>
 
             {user && (
-              <Card className="mb-8 md:mb-0 border-x-0 rounded-none md:border-x md:rounded-xl shadow-none md:shadow-sm border-t md:border-t-0">
-                <CardContent className="pt-6">
+              <Card className="mb-8 md:mb-0">
+                <CardContent className="pt-4 md:pt-6">
                   <h2 className="mb-4 text-lg font-semibold">Listed By</h2>
                   <div className="flex items-center gap-3">
                     <Avatar className="h-12 w-12">
