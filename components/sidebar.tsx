@@ -30,11 +30,13 @@ export function Sidebar() {
   if (!isAuthenticated) return null
 
   return (
-    <aside className="hidden w-64 flex-col border-r border-border bg-card p-4 transition-all md:flex lg:w-72">
+    <aside className="sticky top-0 hidden h-screen w-64 flex-col border-r border-border bg-card p-4 transition-all md:flex lg:w-72">
       <div className="mb-8 flex items-center gap-2 px-2">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-lg shadow-primary/20">
-          <Building2 className="h-6 w-6 text-primary-foreground" />
-        </div>
+        <img 
+          src="/favicon.png" 
+          alt="Dubilook" 
+          className="h-9 w-9 object-contain"
+        />
         <span className="text-xl font-bold tracking-tight text-foreground">Dubilook</span>
       </div>
 
