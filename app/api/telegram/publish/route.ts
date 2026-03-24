@@ -12,12 +12,14 @@ function escapeHTML(str: string): string {
     .replace(/>/g, '&gt;')
 }
 
-function ensureAbsoluteUrl(url: string): string {
-  if (!url) return ''
+function ensureAbsoluteUrl(url: string, fallbackBase?: string): string {
+  if (!url) return fallbackBase || ''
   if (url.startsWith('http://') || url.startsWith('https://')) return url
-  // Handle protocol-relative URLs
   if (url.startsWith('//')) return `https:${url}`
-  return `https://${url}`
+  if (url.startsWith('/') && fallbackBase) {
+    return `${fallbackBase.replace(/\/$/, '')}${url}`
+  }
+  return `https://${url.replace(/^\/+/, '')}`
 }
 
 async function sendToTelegram(chatId: string | number, listing: Listing, ctas: ListingCTA[], baseUrl: string): Promise<{ success: boolean; messageId?: number; error?: string }> {
@@ -63,10 +65,10 @@ async function sendToTelegram(chatId: string | number, listing: Listing, ctas: L
   }
 
   // Add View Details button (ensure absolute URL)
-  const absoluteBaseUrl = ensureAbsoluteUrl(baseUrl)
+  const detailUrl = ensureAbsoluteUrl(`/listings/${listing.id}`, baseUrl)
   buttons.push([{ 
     text: '👁️ View on Web', 
-    url: `${absoluteBaseUrl.replace(/\/$/, '')}/listings/${listing.id}` 
+    url: detailUrl 
   }])
 
   const reply_markup = { inline_keyboard: buttons }
@@ -197,7 +199,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No active Telegram channels configured' }, { status: 500 })
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (request.headers.get('origin') || '')
+    const origin = request.headers.get('origin') || request.headers.get('referer') || ''
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || origin || 'https://dubilook.ae'
 
     // Broadcast to all channels
     let successCount = 0
