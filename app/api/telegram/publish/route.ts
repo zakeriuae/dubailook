@@ -20,10 +20,9 @@ function ensureAbsoluteUrl(url: string): string {
   return `https://${url}`
 }
 
-async function sendToTelegram(chatId: string | number, listing: Listing, ctas: ListingCTA[], baseUrl: string): Promise<number | null> {
+async function sendToTelegram(chatId: string | number, listing: Listing, ctas: ListingCTA[], baseUrl: string): Promise<{ success: boolean; messageId?: number; error?: string }> {
   if (!TELEGRAM_BOT_TOKEN) {
-    console.error('Telegram bot token not configured')
-    return null
+    return { success: false, error: 'Telegram bot token not configured' }
   }
 
   // Build message text
@@ -71,13 +70,7 @@ async function sendToTelegram(chatId: string | number, listing: Listing, ctas: L
   }])
 
   const reply_markup = { inline_keyboard: buttons }
-
-  console.log('Sending to Telegram:', {
-    chatId,
-    hasPhoto: !!listing.image_url,
-    buttonCount: buttons.length,
-    messageLength: message.length
-  })
+  let lastError = 'Unknown error'
 
   try {
     // If there's an image, send photo with caption
@@ -96,8 +89,9 @@ async function sendToTelegram(chatId: string | number, listing: Listing, ctas: L
 
       const data = await res.json()
       if (data.ok) {
-        return data.result.message_id
+        return { success: true, messageId: data.result.message_id }
       }
+      lastError = data.description || 'Failed to send photo'
       console.error('Telegram sendPhoto error:', JSON.stringify(data, null, 2))
     }
 
@@ -116,13 +110,13 @@ async function sendToTelegram(chatId: string | number, listing: Listing, ctas: L
 
     const data = await res.json()
     if (data.ok) {
-      return data.result.message_id
+      return { success: true, messageId: data.result.message_id }
     }
+    lastError = data.description || 'Failed to send message'
     console.error('Telegram sendMessage error:', JSON.stringify(data, null, 2))
-    return null
+    return { success: false, error: lastError }
   } catch (error) {
-    console.error('Telegram API error:', error)
-    return null
+    return { success: false, error: (error as Error).message }
   }
 }
 
@@ -208,12 +202,15 @@ export async function POST(request: NextRequest) {
     // Broadcast to all channels
     let successCount = 0
     let lastMessageId = null
+    let lastPublishError = null
 
     for (const chatId of activeChannelIds) {
-      const messageId = await sendToTelegram(chatId, listing, listing.listing_cta || [], baseUrl)
-      if (messageId) {
+      const result = await sendToTelegram(chatId, listing, listing.listing_cta || [], baseUrl)
+      if (result.success && result.messageId) {
         successCount++
-        lastMessageId = messageId
+        lastMessageId = result.messageId
+      } else {
+        lastPublishError = result.error
       }
     }
 
@@ -250,7 +247,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, broadcastCount: successCount })
     }
 
-    return NextResponse.json({ error: 'Failed to broadcast to any Telegram channel' }, { status: 500 })
+    return NextResponse.json({ error: lastPublishError || 'Failed to broadcast to any Telegram channel' }, { status: 500 })
   } catch (error) {
     console.error('Publish error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

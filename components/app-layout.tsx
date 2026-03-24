@@ -23,7 +23,12 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-background">
+      <div className="flex h-screen w-full flex-col items-center justify-center bg-background gap-6">
+        <img 
+          src="/logo.png" 
+          alt="Dubilook" 
+          className="h-12 md:h-16 w-auto object-contain animate-pulse"
+        />
         <Spinner className="h-8 w-8 text-primary" />
       </div>
     )
