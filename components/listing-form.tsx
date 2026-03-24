@@ -175,6 +175,11 @@ export function ListingForm() {
   }
 
   const onSubmit = async (data: ListingFormData) => {
+    if (step < 4) {
+      if (canProceed()) setStep(step + 1)
+      return
+    }
+
     const activeCtas = []
     if (whatsapp.enabled && whatsapp.value.trim()) activeCtas.push({ type: 'whatsapp' as const, value: whatsapp.value.trim() })
     if (telegram.enabled && telegram.value.trim()) activeCtas.push({ type: 'telegram' as const, value: telegram.value.trim() })
