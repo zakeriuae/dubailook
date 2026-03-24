@@ -34,42 +34,60 @@ async function sendToTelegram(chatId: string | number, listing: Listing, ctas: L
   message += `${escapeHTML(listing.description)}\n\n`
   
   // Prepare inline buttons
-  const buttons = []
+  const allButtons = []
   
   for (const cta of ctas) {
     if (cta.cta_type === 'whatsapp') {
       const phone = cta.value.replace(/\D/g, '')
       if (phone) {
-        buttons.push([{ 
+        allButtons.push({ 
           text: '💬 WhatsApp', 
           url: `https://wa.me/${phone}` 
-        }])
+        })
       }
     } else if (cta.cta_type === 'telegram') {
       const username = cta.value.replace('@', '').trim()
       if (username) {
-        buttons.push([{ 
+        allButtons.push({ 
           text: '✈️ Telegram', 
           url: `https://t.me/${username}` 
-        }])
+        })
       }
     } else if (cta.cta_type === 'url') {
-      const absoluteUrl = ensureAbsoluteUrl(cta.value.trim())
+      const absoluteUrl = ensureAbsoluteUrl(cta.value.trim(), baseUrl)
       if (absoluteUrl) {
-        buttons.push([{ 
+        allButtons.push({ 
           text: `🔗 ${escapeHTML(cta.label || 'Website')}`, 
           url: absoluteUrl 
-        }])
+        })
       }
     }
   }
 
   // Add View Details button (ensure absolute URL)
   const detailUrl = ensureAbsoluteUrl(`/listings/${listing.id}`, baseUrl)
-  buttons.push([{ 
+  allButtons.push({ 
     text: '👁️ View on Web', 
     url: detailUrl 
-  }])
+  })
+
+  // Group buttons into rows based on count
+  const buttons: any[][] = []
+  const count = allButtons.length
+
+  if (count <= 3) {
+    // 1-3 buttons: all in one row
+    buttons.push(allButtons)
+  } else if (count === 4) {
+    // 4 buttons: 2x2 grid
+    buttons.push(allButtons.slice(0, 2))
+    buttons.push(allButtons.slice(2, 4))
+  } else {
+    // 5+ buttons: 2 per row
+    for (let i = 0; i < allButtons.length; i += 2) {
+      buttons.push(allButtons.slice(i, i + 2))
+    }
+  }
 
   const reply_markup = { inline_keyboard: buttons }
   let lastError = 'Unknown error'
@@ -200,7 +218,7 @@ export async function POST(request: NextRequest) {
     }
 
     const origin = request.headers.get('origin') || request.headers.get('referer') || ''
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || origin || 'https://dubilook.ae'
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || origin || 'https://dubilook.zakeri.dev'
 
     // Broadcast to all channels
     let successCount = 0
