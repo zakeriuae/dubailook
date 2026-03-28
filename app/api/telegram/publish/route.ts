@@ -41,7 +41,7 @@ async function sendToTelegram(chatId: string | number, listing: Listing, ctas: L
       const phone = cta.value.replace(/\D/g, '')
       if (phone) {
         allButtons.push({ 
-          text: '💬 WhatsApp', 
+          text: 'Whatsapp', 
           url: `https://wa.me/${phone}` 
         })
       }
@@ -49,7 +49,7 @@ async function sendToTelegram(chatId: string | number, listing: Listing, ctas: L
       const username = cta.value.replace('@', '').trim()
       if (username) {
         allButtons.push({ 
-          text: '✈️ Telegram', 
+          text: 'Telegram', 
           url: `https://t.me/${username}` 
         })
       }
@@ -57,17 +57,17 @@ async function sendToTelegram(chatId: string | number, listing: Listing, ctas: L
       const absoluteUrl = ensureAbsoluteUrl(cta.value.trim(), baseUrl)
       if (absoluteUrl) {
         allButtons.push({ 
-          text: `🔗 ${escapeHTML(cta.label || 'Website')}`, 
+          text: 'More Info', 
           url: absoluteUrl 
         })
       }
     }
   }
 
-  // Add View Details button (ensure absolute URL)
+  // Add View on Web button (ensure absolute URL)
   const detailUrl = ensureAbsoluteUrl(`/listings/${listing.id}`, baseUrl)
   allButtons.push({ 
-    text: '👁️ View on Web', 
+    text: 'Web', 
     url: detailUrl 
   })
 

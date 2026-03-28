@@ -21,6 +21,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
+    // Prevent links in description
+    const urlRegex = /(https?:\/\/|www\.)[^\s]+|(\b[a-z0-9]+\.[a-z]{2,})/gi
+    if (urlRegex.test(description)) {
+      return NextResponse.json({ error: 'Links and URLs are not allowed in the description' }, { status: 400 })
+    }
+
+    // Require at least some English text
+    if (!/[a-zA-Z]{2,}/.test(description)) {
+      return NextResponse.json({ error: 'Description must contain at least some English text' }, { status: 400 })
+    }
+
     const supabase = await createAdminClient()
     const imageUrls: string[] = data.image_urls || []
     

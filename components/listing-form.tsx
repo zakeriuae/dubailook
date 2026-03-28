@@ -23,7 +23,17 @@ import type { ListingType, PublishingMode, CTAType, Profile } from '@/lib/types'
 
 const listingSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters'),
-  description: z.string().min(20, 'Description must be at least 20 characters'),
+  description: z.string()
+    .min(20, 'Description must be at least 20 characters')
+    .max(1000, 'Description cannot exceed 1000 characters')
+    .refine(
+      (val) => !/(https?:\/\/|www\.)[^\s]+|(\b[a-z0-9]+\.[a-z]{2,})/gi.test(val),
+      { message: 'Links and URLs are not allowed in the description' }
+    )
+    .refine(
+      (val) => /[a-zA-Z]{2,}/.test(val),
+      { message: 'Description must contain at least some English text' }
+    ),
   listing_type: z.enum(['custom_offer', 'buyer_request', 'property', 'land', 'project']),
   publishing_mode: z.enum(['one_time', 'ten_times_daily', 'ten_times_every_other_day', 'five_times_weekly']),
 })
@@ -36,12 +46,12 @@ interface ContactMethod {
   label?: string
 }
 
-const listingTypes: { value: ListingType; icon: React.ReactNode }[] = [
+const listingTypes: { value: ListingType; icon: React.ReactNode; disabled?: boolean }[] = [
   { value: 'custom_offer', icon: <Package className="h-6 w-6" /> },
-  { value: 'property', icon: <Building2 className="h-6 w-6" /> },
-  { value: 'land', icon: <LandPlot className="h-6 w-6" /> },
-  { value: 'project', icon: <Briefcase className="h-6 w-6" /> },
-  { value: 'buyer_request', icon: <Users className="h-6 w-6" /> },
+  { value: 'property', icon: <Building2 className="h-6 w-6" />, disabled: true },
+  { value: 'land', icon: <LandPlot className="h-6 w-6" />, disabled: true },
+  { value: 'project', icon: <Briefcase className="h-6 w-6" />, disabled: true },
+  { value: 'buyer_request', icon: <Users className="h-6 w-6" />, disabled: true },
 ]
 
 const publishingModes: PublishingMode[] = ['one_time', 'ten_times_daily', 'ten_times_every_other_day', 'five_times_weekly']
@@ -263,20 +273,34 @@ export function ListingForm() {
               onValueChange={(value: string) => form.setValue('listing_type', value as ListingType)}
               className="grid gap-4 sm:grid-cols-2"
             >
-              {listingTypes.map(({ value, icon }) => (
-                <Label
+              {listingTypes.map(({ value, icon, disabled }) => (
+                <div
                   key={value}
-                  htmlFor={value}
-                  className={`flex cursor-pointer items-center gap-4 rounded-xl border-2 p-4 transition-all ${
-                    form.watch('listing_type') === value ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
+                  onClick={() => !disabled && form.setValue('listing_type', value as ListingType)}
+                  className={`relative flex items-center gap-4 rounded-xl border-2 p-4 transition-all ${
+                    disabled
+                      ? 'cursor-not-allowed border-border opacity-50'
+                      : form.watch('listing_type') === value
+                        ? 'cursor-pointer border-primary bg-primary/5'
+                        : 'cursor-pointer border-border hover:border-primary/50'
                   }`}
                 >
-                  <RadioGroupItem value={value} id={value} className="sr-only" />
-                  <div className={`rounded-lg p-2 ${form.watch('listing_type') === value ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                  <RadioGroupItem value={value} id={value} className="sr-only" disabled={disabled} />
+                  <div className={`rounded-lg p-2 ${
+                    disabled ? 'bg-muted text-muted-foreground' :
+                    form.watch('listing_type') === value ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                  }`}>
                     {icon}
                   </div>
-                  <span className="font-medium text-lg">{LISTING_TYPE_LABELS[value]}</span>
-                </Label>
+                  <span className={`font-medium text-lg ${disabled ? 'text-muted-foreground' : ''}`}>
+                    {LISTING_TYPE_LABELS[value]}
+                  </span>
+                  {disabled && (
+                    <span className="ml-auto text-[10px] font-semibold uppercase tracking-wider text-muted-foreground border border-muted-foreground/30 rounded px-1.5 py-0.5">
+                      Soon
+                    </span>
+                  )}
+                </div>
               ))}
             </RadioGroup>
           </CardContent>
@@ -296,7 +320,18 @@ export function ListingForm() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
-              <Textarea id="description" placeholder="Describe property features, location, etc." className="min-h-[150px]" {...form.register('description')} />
+              <Textarea 
+                id="description" 
+                placeholder="Describe property features, location, etc." 
+                className="min-h-[150px] resize-none" 
+                {...form.register('description')} 
+                maxLength={1000}
+              />
+              <div className="flex justify-end">
+                <span className={`text-xs ${(form.watch('description') || '').length >= 1000 ? 'text-destructive font-bold' : 'text-muted-foreground'}`}>
+                  {(form.watch('description') || '').length}/1000
+                </span>
+              </div>
             </div>
             <div className="space-y-3">
               <Label className="flex justify-between">
