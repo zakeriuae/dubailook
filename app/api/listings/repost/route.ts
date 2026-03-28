@@ -29,20 +29,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Only published or approved listings can be reposted' }, { status: 400 })
     }
 
-    // 2. Check daily limit
-    const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD
-    
-    const { data: recentRepost, error: checkError } = await supabase
-      .from('listing_reposts')
-      .select('id')
-      .eq('listing_id', listingId)
-      .gte('created_at', `${today}T00:00:00.000Z`)
-      .lte('created_at', `${today}T23:59:59.999Z`)
-      .limit(1)
+    // 2. Check daily limit (Look at listing_schedules as the master record)
+    const { data: publishedToday, error: checkError } = await supabase
+      .rpc('was_published_today', { p_listing_id: listingId })
 
-    if (recentRepost && recentRepost.length > 0) {
+    if (publishedToday) {
       return NextResponse.json({ 
-        error: 'This listing has already been reposted today. You can only repost once per day.' 
+        error: 'This listing has already been published today. You can only repost once per day.' 
       }, { status: 429 })
     }
 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { requireAdmin } from '@/lib/session'
 
 export async function POST(request: NextRequest) {
@@ -12,6 +12,19 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = await createClient()
+
+    // Enforce daily limit for the 'repost' action
+    if (action === 'repost') {
+      const adminClient = await createAdminClient()
+      const { data: publishedToday } = await adminClient
+        .rpc('was_published_today', { p_listing_id: listingId })
+
+      if (publishedToday) {
+        return NextResponse.json({ 
+          error: 'This listing has already been published today. You can only repost once per day.' 
+        }, { status: 429 })
+      }
+    }
 
     let newStatus: string
     switch (action) {
