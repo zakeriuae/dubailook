@@ -34,7 +34,7 @@ import { Label } from '@/components/ui/label'
 import { LISTING_TYPE_LABELS } from '@/lib/types'
 import type { Listing } from '@/lib/types'
 import { getOptimizedImageUrl } from '@/lib/storage'
-import { formatRelativeDate } from '@/lib/utils'
+import { formatRelativeDate, getAvatarColor, getInitials, cn } from '@/lib/utils'
 
 interface AdminListingTableProps {
   listings: Listing[]
@@ -142,10 +142,13 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
                 <TableCell>
                   {listing.user && (
                     <div className="flex items-center gap-2">
-                       <Avatar className="h-6 w-6">
+                       <Avatar className="h-6 w-6 ring-1 ring-border">
                         <AvatarImage src={listing.user.photo_url || undefined} />
-                        <AvatarFallback className="text-[10px]">
-                          {listing.user.first_name?.[0] || 'U'}
+                        <AvatarFallback className={cn(
+                          "text-white font-bold text-[10px] bg-gradient-to-tr",
+                          getAvatarColor(listing.user.first_name || 'User')
+                        )}>
+                          {getInitials(listing.user.first_name, listing.user.last_name)}
                         </AvatarFallback>
                       </Avatar>
                       <span className="text-xs truncate max-w-[80px]">{listing.user.first_name}</span>
@@ -287,9 +290,14 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
                     <div className="flex items-center gap-3">
                       {listing.user && (
                         <div className="flex items-center gap-1.5">
-                          <Avatar className="h-5 w-5">
+                          <Avatar className="h-5 w-5 ring-1 ring-white">
                             <AvatarImage src={listing.user.photo_url || undefined} />
-                            <AvatarFallback className="text-[8px]">{listing.user.first_name?.[0]}</AvatarFallback>
+                            <AvatarFallback className={cn(
+                              "text-white font-bold text-[8px] bg-gradient-to-tr",
+                              getAvatarColor(listing.user.first_name || 'User')
+                            )}>
+                              {getInitials(listing.user.first_name, listing.user.last_name)}
+                            </AvatarFallback>
                           </Avatar>
                           <span className="text-[11px] text-muted-foreground font-medium truncate max-w-[70px]">{listing.user.first_name}</span>
                         </div>

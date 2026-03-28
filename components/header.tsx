@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { LayoutDashboard, Shield, LogOut, User, Menu, Bell } from 'lucide-react'
 import { useState } from 'react'
+import { getAvatarColor, getInitials, cn } from '@/lib/utils'
 
 export function Header() {
   const { profile, isAuthenticated, isAdmin, logout } = useAuth()
@@ -58,10 +59,13 @@ export function Header() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative flex items-center gap-2 rounded-full border border-border p-1 pr-3 hover:bg-muted/50">
-                    <Avatar className="h-8 w-8">
+                    <Avatar className="h-8 w-8 ring-1 ring-border shadow-sm">
                       <AvatarImage src={profile?.photo_url || undefined} alt="Profile" />
-                      <AvatarFallback className="bg-primary text-primary-foreground">
-                        {profile?.first_name?.[0] || 'U'}
+                      <AvatarFallback className={cn(
+                        "text-white font-bold text-[10px] bg-gradient-to-tr",
+                        getAvatarColor(profile?.first_name || 'User')
+                      )}>
+                        {getInitials(profile?.first_name, profile?.last_name)}
                       </AvatarFallback>
                     </Avatar>
                     <span className="hidden text-sm font-medium lg:inline-block">
@@ -71,10 +75,13 @@ export function Header() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-64 p-2" align="end">
                   <div className="flex items-center gap-3 p-3">
-                    <Avatar className="h-12 w-12">
+                    <Avatar className="h-12 w-12 ring-2 ring-white shadow-md">
                       <AvatarImage src={profile?.photo_url || undefined} />
-                      <AvatarFallback className="bg-primary text-primary-foreground text-xl">
-                        {profile?.first_name?.[0]}
+                      <AvatarFallback className={cn(
+                        "text-white font-bold text-xl bg-gradient-to-tr",
+                        getAvatarColor(profile?.first_name || 'User')
+                      )}>
+                        {getInitials(profile?.first_name, profile?.last_name)}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col">

@@ -15,6 +15,7 @@ import { LISTING_TYPE_LABELS, LISTING_STATUS_LABELS } from '@/lib/types'
 import type { Listing } from '@/lib/types'
 import { ContactButtons } from '@/components/contact-buttons'
 import { getOptimizedImageUrl } from '@/lib/storage'
+import { getAvatarColor, getInitials, cn } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
 
@@ -187,10 +188,13 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                 <CardContent className="pt-4 md:pt-6">
                   <h2 className="mb-4 text-lg font-semibold">Listed By</h2>
                   <div className="flex items-center gap-3">
-                    <Avatar className="h-12 w-12">
+                    <Avatar className="h-12 w-12 ring-2 ring-white shadow-sm">
                       <AvatarImage src={user.photo_url || undefined} />
-                      <AvatarFallback className="bg-primary text-primary-foreground">
-                        {user.first_name?.[0] || 'U'}
+                      <AvatarFallback className={cn(
+                        "text-white font-bold text-lg bg-gradient-to-tr",
+                        getAvatarColor(user.first_name || 'User')
+                      )}>
+                        {getInitials(user.first_name, user.last_name)}
                       </AvatarFallback>
                     </Avatar>
                     <div>
