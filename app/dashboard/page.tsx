@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Plus, Eye, Users, FileText, Clock, CheckCircle, XCircle, Send } from 'lucide-react'
-import { ListingsGrid } from '@/components/listings-grid'
+import { DashboardListingTable } from '@/components/dashboard/listing-table'
 import type { Listing } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
@@ -161,11 +161,8 @@ export default async function DashboardPage() {
           </Button>
         </div>
         
-        <ListingsGrid 
+        <DashboardListingTable 
           listings={userListings} 
-          showStatus 
-          showStats
-          emptyMessage="You haven't created any listings yet"
         />
       </div>
     </div>
