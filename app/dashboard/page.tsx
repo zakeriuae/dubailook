@@ -23,7 +23,8 @@ export default async function DashboardPage() {
     .select(`
       *,
       listing_cta (*),
-      listing_stats (*)
+      listing_stats (*),
+      listing_schedules (published_at, is_completed)
     `)
     .eq('user_id', profile.id)
     .order('created_at', { ascending: false }) as { data: Listing[] | null }

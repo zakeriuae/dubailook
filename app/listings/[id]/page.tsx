@@ -165,6 +165,10 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
               <CardContent className="pt-4 md:pt-6">
                 <h2 className="mb-4 text-lg font-semibold">Description</h2>
                 <p className="whitespace-pre-wrap text-muted-foreground">{listing.description}</p>
+                
+                <div className="mt-12 border-t pt-6 text-center text-xs text-muted-foreground">
+                  ©Copyright 2026 | All Rights Reserved, DUBILOOK™
+                </div>
               </CardContent>
             </Card>
           </div>

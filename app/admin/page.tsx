@@ -19,7 +19,8 @@ export default async function AdminPage() {
       *,
       listing_cta (*),
       listing_stats (*),
-      user:profiles (*)
+      user:profiles (*),
+      listing_schedules (published_at, is_completed)
     `)
     .order('created_at', { ascending: false }) as { data: Listing[] | null }
 

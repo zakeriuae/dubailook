@@ -22,6 +22,7 @@ import { Eye, ExternalLink, Clock, CheckCircle, XCircle, Send } from 'lucide-rea
 import { LISTING_TYPE_LABELS, LISTING_STATUS_LABELS } from '@/lib/types'
 import type { Listing } from '@/lib/types'
 import { getOptimizedImageUrl } from '@/lib/storage'
+import { formatRelativeDate } from '@/lib/utils'
 
 interface DashboardListingTableProps {
   listings: Listing[]
@@ -32,6 +33,7 @@ const statusColors: Record<string, string> = {
   approved: 'bg-emerald-100 text-emerald-800 border-emerald-200',
   rejected: 'bg-red-100 text-red-800 border-red-200',
   published: 'bg-primary/10 text-primary border-primary/20',
+  deactivated: 'bg-slate-100 text-slate-800 border-slate-200',
 }
 
 const statusIcons: Record<string, React.ReactNode> = {
@@ -39,11 +41,59 @@ const statusIcons: Record<string, React.ReactNode> = {
   approved: <CheckCircle className="h-3 w-3" />,
   rejected: <XCircle className="h-3 w-3" />,
   published: <Send className="h-3 w-3" />,
+  deactivated: <XCircle className="h-3 w-3" />,
 }
 
 export function DashboardListingTable({ listings }: DashboardListingTableProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState<string | null>(null)
+
+  const handleRepost = async (listingId: string) => {
+    setIsLoading(listingId)
+    try {
+      const res = await fetch('/api/listings/repost', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ listingId }),
+      })
+
+      const data = await res.json()
+
+      if (res.ok) {
+        toast.success('Listing reposted successfully to Telegram!')
+        router.refresh()
+      } else {
+        toast.error(data.error || 'Failed to repost')
+      }
+    } catch {
+      toast.error('An error occurred during repost')
+    } finally {
+      setIsLoading(null)
+    }
+  }
+
+  const handleStatusChange = async (listingId: string, status: string) => {
+    setIsLoading(listingId)
+    try {
+      const res = await fetch('/api/listings/status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ listingId, status }),
+      })
+
+      if (res.ok) {
+        toast.success(`Listing ${status === 'deactivated' ? 'deactivated' : 'activated'} successfully`)
+        router.refresh()
+      } else {
+        const data = await res.json()
+        toast.error(data.error || 'Failed to update status')
+      }
+    } catch {
+      toast.error('An error occurred')
+    } finally {
+      setIsLoading(null)
+    }
+  }
 
   if (listings.length === 0) {
     return (
@@ -69,6 +119,7 @@ export function DashboardListingTable({ listings }: DashboardListingTableProps) 
               <TableHead>Status</TableHead>
               <TableHead>Views</TableHead>
               <TableHead>Created</TableHead>
+              <TableHead>Last Post</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -122,6 +173,14 @@ export function DashboardListingTable({ listings }: DashboardListingTableProps) 
                 <TableCell className="text-xs text-muted-foreground">
                   {new Date(listing.created_at).toLocaleDateString()}
                 </TableCell>
+                <TableCell className="text-xs font-medium">
+                  {(() => {
+                    const latest = listing.listing_schedules
+                      ?.filter(s => s.is_completed && s.published_at)
+                      .reduce((acc, s) => !acc || new Date(s.published_at!) > new Date(acc) ? s.published_at : acc, null as string | null);
+                    return formatRelativeDate(latest);
+                  })()}
+                </TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-2">
                     <Button size="sm" variant="outline" className="h-8 gap-1.5" asChild>
@@ -130,6 +189,52 @@ export function DashboardListingTable({ listings }: DashboardListingTableProps) 
                         Details
                       </Link>
                     </Button>
+
+                    {(listing.status === 'published' || listing.status === 'approved') && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 gap-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        onClick={() => handleRepost(listing.id)}
+                        disabled={
+                          isLoading === listing.id || 
+                          listing.listing_schedules?.some(s => s.is_completed && s.published_at?.startsWith(new Date().toISOString().split('T')[0]))
+                        }
+                      >
+                        {isLoading === listing.id ? (
+                          <Spinner className="h-3.5 w-3.5" />
+                        ) : (
+                          <Send className="h-3.5 w-3.5" />
+                        )}
+                        {listing.listing_schedules?.some(s => s.is_completed && s.published_at?.startsWith(new Date().toISOString().split('T')[0])) 
+                          ? 'Reposted' 
+                          : 'Repost'}
+                      </Button>
+                    )}
+
+                    {listing.status !== 'deactivated' ? (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 gap-1.5 text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                        onClick={() => handleStatusChange(listing.id, 'deactivated')}
+                        disabled={isLoading === listing.id}
+                      >
+                        <XCircle className="h-3.5 w-3.5" />
+                        Deactivate
+                      </Button>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 gap-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                        onClick={() => handleStatusChange(listing.id, 'pending')}
+                        disabled={isLoading === listing.id}
+                      >
+                        <CheckCircle className="h-3.5 w-3.5" />
+                        Re-activate
+                      </Button>
+                    )}
                   </div>
                 </TableCell>
               </TableRow>
@@ -182,6 +287,16 @@ export function DashboardListingTable({ listings }: DashboardListingTableProps) 
                       {listing.listing_stats?.page_views || 0}
                     </div>
                     
+                    <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                      <Send className="h-2.5 w-2.5" />
+                      {(() => {
+                        const latest = listing.listing_schedules
+                          ?.filter(s => s.is_completed && s.published_at)
+                          .reduce((acc, s) => !acc || new Date(s.published_at!) > new Date(acc) ? s.published_at : acc, null as string | null);
+                        return formatRelativeDate(latest);
+                      })()}
+                    </div>
+                    
                     <div className="text-[11px] text-muted-foreground ml-auto">
                       {new Date(listing.created_at).toLocaleDateString()}
                     </div>
@@ -190,12 +305,57 @@ export function DashboardListingTable({ listings }: DashboardListingTableProps) 
               </div>
 
               <div className="mt-4 flex items-center justify-between gap-2 border-t pt-3">
-                <Button variant="outline" size="sm" className="h-9 w-full gap-1.5" asChild>
+                <Button variant="outline" size="sm" className="h-9 flex-1 gap-1.5" asChild>
                   <Link href={`/listings/${listing.id}`}>
                     <ExternalLink className="h-4 w-4" />
-                    View Details
+                    Details
                   </Link>
                 </Button>
+
+                {(listing.status === 'published' || listing.status === 'approved') && (
+                  <Button
+                    size="sm"
+                    className="h-9 flex-1 gap-1.5 bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+                    onClick={() => handleRepost(listing.id)}
+                    disabled={
+                      isLoading === listing.id || 
+                      listing.listing_schedules?.some(s => s.is_completed && s.published_at?.startsWith(new Date().toISOString().split('T')[0]))
+                    }
+                  >
+                    {isLoading === listing.id ? (
+                      <Spinner className="h-4 w-4" />
+                    ) : (
+                      <Send className="h-4 w-4" />
+                    )}
+                    {listing.listing_schedules?.some(s => s.is_completed && s.published_at?.startsWith(new Date().toISOString().split('T')[0])) 
+                      ? 'Posted Today' 
+                      : 'Repost'}
+                  </Button>
+                )}
+
+                {listing.status !== 'deactivated' ? (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-9 flex-1 gap-1.5 border-orange-200 text-orange-600 hover:bg-orange-50"
+                    onClick={() => handleStatusChange(listing.id, 'deactivated')}
+                    disabled={isLoading === listing.id}
+                  >
+                    <XCircle className="h-4 w-4" />
+                    Deactivate
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-9 flex-1 gap-1.5 border-emerald-200 text-emerald-600 hover:bg-emerald-50"
+                    onClick={() => handleStatusChange(listing.id, 'pending')}
+                    disabled={isLoading === listing.id}
+                  >
+                    <CheckCircle className="h-4 w-4" />
+                    Re-activate
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>

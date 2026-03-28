@@ -32,6 +32,7 @@ import { CheckCircle, XCircle, Send, Eye, ExternalLink } from 'lucide-react'
 import { LISTING_TYPE_LABELS } from '@/lib/types'
 import type { Listing } from '@/lib/types'
 import { getOptimizedImageUrl } from '@/lib/storage'
+import { formatRelativeDate } from '@/lib/utils'
 
 interface AdminListingTableProps {
   listings: Listing[]
@@ -46,7 +47,7 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null)
   const [rejectReason, setRejectReason] = useState('')
 
-  const handleAction = async (listingId: string, action: 'approve' | 'reject' | 'publish' | 'repost', reason?: string) => {
+  const handleAction = async (listingId: string, action: 'approve' | 'reject' | 'publish' | 'repost' | 'deactivate' | 'activate', reason?: string) => {
     setIsLoading(listingId)
     try {
       const res = await fetch('/api/admin/listings', {
@@ -99,6 +100,7 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
               <TableHead>Owner</TableHead>
               <TableHead>Stats</TableHead>
               <TableHead>Created</TableHead>
+              <TableHead>Last Post</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -155,6 +157,14 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
                 </TableCell>
                 <TableCell className="text-xs text-muted-foreground">
                   {new Date(listing.created_at).toLocaleDateString()}
+                </TableCell>
+                <TableCell className="text-xs font-medium">
+                  {(() => {
+                    const latest = listing.listing_schedules
+                      ?.filter(s => s.is_completed && s.published_at)
+                      .reduce((acc, s) => !acc || new Date(s.published_at!) > new Date(acc) ? s.published_at : acc, null as string | null);
+                    return formatRelativeDate(latest);
+                  })()}
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-1.5">
@@ -225,6 +235,30 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
                         <span className="hidden lg:inline">Repost</span>
                       </Button>
                     )}
+
+                    {listing.status !== 'deactivated' ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 gap-1 border-orange-200 px-2 text-orange-600 hover:bg-orange-50"
+                        onClick={() => handleAction(listing.id, 'deactivate')}
+                        disabled={isLoading === listing.id}
+                      >
+                        <XCircle className="h-4 w-4" />
+                        <span className="hidden lg:inline">Deactivate</span>
+                      </Button>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 gap-1 border-emerald-200 px-2 text-emerald-600 hover:bg-emerald-50"
+                        onClick={() => handleAction(listing.id, 'activate')}
+                        disabled={isLoading === listing.id}
+                      >
+                        <CheckCircle className="h-4 w-4" />
+                        <span className="hidden lg:inline">Activate</span>
+                      </Button>
+                    )}
                   </div>
                 </TableCell>
               </TableRow>
@@ -276,6 +310,15 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
                     <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
                       <Eye className="h-3 w-3" />
                       {listing.listing_stats?.page_views || 0}
+                    </div>
+                    <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                      <Send className="h-2.5 w-2.5" />
+                      {(() => {
+                        const latest = listing.listing_schedules
+                          ?.filter(s => s.is_completed && s.published_at)
+                          .reduce((acc, s) => !acc || new Date(s.published_at!) > new Date(acc) ? s.published_at : acc, null as string | null);
+                        return formatRelativeDate(latest);
+                      })()}
                     </div>
                     <div className="text-[11px] text-muted-foreground ml-auto">
                       {new Date(listing.created_at).toLocaleDateString()}
@@ -343,7 +386,7 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
                     <Button
                       size="sm"
                       variant="outline"
-                      className="h-9 gap-1.5 border-blue-200 text-blue-600 bg-blue-50/50"
+                      className="h-9 flex-1 gap-1.5 border-blue-200 text-blue-600 bg-blue-50/50"
                       onClick={() => handleAction(listing.id, 'repost')}
                       disabled={isLoading === listing.id}
                     >
@@ -353,6 +396,30 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
                         <Send className="h-4 w-4" />
                       )}
                       Repost
+                    </Button>
+                  )}
+
+                  {listing.status !== 'deactivated' ? (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-9 flex-1 gap-1.5 border-orange-200 text-orange-600 bg-orange-50/50"
+                      onClick={() => handleAction(listing.id, 'deactivate')}
+                      disabled={isLoading === listing.id}
+                    >
+                      <XCircle className="h-4 w-4" />
+                      Deactivate
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-9 flex-1 gap-1.5 border-emerald-200 text-emerald-600 bg-emerald-50/50"
+                      onClick={() => handleAction(listing.id, 'activate')}
+                      disabled={isLoading === listing.id}
+                    >
+                      <CheckCircle className="h-4 w-4" />
+                      Activate
                     </Button>
                   )}
                 </div>

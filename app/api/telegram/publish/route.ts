@@ -32,6 +32,7 @@ async function sendToTelegram(chatId: string | number, listing: Listing, ctas: L
   let message = `<b>${escapeHTML(listing.title)}</b>\n\n`
   message += `📍 Type: ${typeLabel}\n\n`
   message += `${escapeHTML(listing.description)}\n\n`
+  message += `©Copyright 2026 | All Rights Reserved, DUBILOOK™`
   
   // Prepare inline buttons
   const allButtons = []

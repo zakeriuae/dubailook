@@ -1,5 +1,5 @@
 export type ListingType = 'custom_offer' | 'buyer_request' | 'property' | 'land' | 'project'
-export type ListingStatus = 'pending' | 'approved' | 'rejected' | 'published'
+export type ListingStatus = 'pending' | 'approved' | 'rejected' | 'published' | 'deactivated'
 export type PublishingMode = 'one_time' | 'ten_times_daily' | 'ten_times_every_other_day' | 'five_times_weekly'
 export type CTAType = 'whatsapp' | 'url' | 'telegram'
 
@@ -30,6 +30,8 @@ export interface Listing {
   user?: Profile
   listing_cta?: ListingCTA[]
   listing_stats?: ListingStats
+  listing_reposts?: { created_at: string }[]
+  listing_schedules?: { published_at: string | null; is_completed: boolean }[]
 }
 
 export interface ListingCTA {
@@ -93,6 +95,7 @@ export const LISTING_STATUS_LABELS: Record<ListingStatus, string> = {
   approved: 'Approved',
   rejected: 'Rejected',
   published: 'Published',
+  deactivated: 'Deactivated',
 }
 
 export const PUBLISHING_MODE_LABELS: Record<PublishingMode, string> = {

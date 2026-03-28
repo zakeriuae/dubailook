@@ -23,7 +23,11 @@ export async function POST(request: NextRequest) {
         break
       case 'publish':
       case 'repost':
+      case 'activate':
         newStatus = 'published'
+        break
+      case 'deactivate':
+        newStatus = 'deactivated'
         break
       default:
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
