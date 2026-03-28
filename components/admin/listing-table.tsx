@@ -29,6 +29,8 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
 import { CheckCircle, XCircle, Send, Eye, ExternalLink } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 import { LISTING_TYPE_LABELS } from '@/lib/types'
 import type { Listing } from '@/lib/types'
 import { getOptimizedImageUrl } from '@/lib/storage'
@@ -101,6 +103,7 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
               <TableHead>Stats</TableHead>
               <TableHead>Created</TableHead>
               <TableHead>Last Post</TableHead>
+              <TableHead className="text-center">Active</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -165,6 +168,13 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
                       .reduce((acc, s) => !acc || new Date(s.published_at!) > new Date(acc) ? s.published_at : acc, null as string | null);
                     return formatRelativeDate(latest);
                   })()}
+                </TableCell>
+                <TableCell className="text-center">
+                  <Switch 
+                    checked={listing.status !== 'deactivated'}
+                    onCheckedChange={(checked) => handleAction(listing.id, checked ? 'activate' : 'deactivate')}
+                    disabled={isLoading === listing.id}
+                  />
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-1.5">
@@ -235,30 +245,6 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
                         <span className="hidden lg:inline">Repost</span>
                       </Button>
                     )}
-
-                    {listing.status !== 'deactivated' ? (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-8 gap-1 border-orange-200 px-2 text-orange-600 hover:bg-orange-50"
-                        onClick={() => handleAction(listing.id, 'deactivate')}
-                        disabled={isLoading === listing.id}
-                      >
-                        <XCircle className="h-4 w-4" />
-                        <span className="hidden lg:inline">Deactivate</span>
-                      </Button>
-                    ) : (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-8 gap-1 border-emerald-200 px-2 text-emerald-600 hover:bg-emerald-50"
-                        onClick={() => handleAction(listing.id, 'activate')}
-                        disabled={isLoading === listing.id}
-                      >
-                        <CheckCircle className="h-4 w-4" />
-                        <span className="hidden lg:inline">Activate</span>
-                      </Button>
-                    )}
                   </div>
                 </TableCell>
               </TableRow>
@@ -297,22 +283,37 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
                     </Badge>
                   </div>
                   
-                  <div className="mt-2 flex items-center gap-3">
-                    {listing.user && (
-                      <div className="flex items-center gap-1.5">
-                        <Avatar className="h-5 w-5">
-                          <AvatarImage src={listing.user.photo_url || undefined} />
-                          <AvatarFallback className="text-[8px]">{listing.user.first_name?.[0]}</AvatarFallback>
-                        </Avatar>
-                        <span className="text-[11px] text-muted-foreground font-medium">{listing.user.first_name}</span>
+                  <div className="mt-2 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      {listing.user && (
+                        <div className="flex items-center gap-1.5">
+                          <Avatar className="h-5 w-5">
+                            <AvatarImage src={listing.user.photo_url || undefined} />
+                            <AvatarFallback className="text-[8px]">{listing.user.first_name?.[0]}</AvatarFallback>
+                          </Avatar>
+                          <span className="text-[11px] text-muted-foreground font-medium truncate max-w-[70px]">{listing.user.first_name}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                        <Eye className="h-3 w-3" />
+                        {listing.listing_stats?.page_views || 0}
                       </div>
-                    )}
-                    <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
-                      <Eye className="h-3 w-3" />
-                      {listing.listing_stats?.page_views || 0}
                     </div>
-                    <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
-                      <Send className="h-2.5 w-2.5" />
+                    
+                    <div className="flex items-center gap-1.5">
+                      <Label className="text-[10px] text-muted-foreground uppercase font-bold">Active</Label>
+                      <Switch 
+                        checked={listing.status !== 'deactivated'}
+                        onCheckedChange={(checked) => handleAction(listing.id, checked ? 'activate' : 'deactivate')}
+                        disabled={isLoading === listing.id}
+                        className="scale-90"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                      <Send className="h-3 w-3" />
                       {(() => {
                         const latest = listing.listing_schedules
                           ?.filter(s => s.is_completed && s.published_at)
@@ -320,9 +321,7 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
                         return formatRelativeDate(latest);
                       })()}
                     </div>
-                    <div className="text-[11px] text-muted-foreground ml-auto">
-                      {new Date(listing.created_at).toLocaleDateString()}
-                    </div>
+                    <div>{new Date(listing.created_at).toLocaleDateString()}</div>
                   </div>
                 </div>
               </div>
@@ -396,30 +395,6 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
                         <Send className="h-4 w-4" />
                       )}
                       Repost
-                    </Button>
-                  )}
-
-                  {listing.status !== 'deactivated' ? (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-9 flex-1 gap-1.5 border-orange-200 text-orange-600 bg-orange-50/50"
-                      onClick={() => handleAction(listing.id, 'deactivate')}
-                      disabled={isLoading === listing.id}
-                    >
-                      <XCircle className="h-4 w-4" />
-                      Deactivate
-                    </Button>
-                  ) : (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-9 flex-1 gap-1.5 border-emerald-200 text-emerald-600 bg-emerald-50/50"
-                      onClick={() => handleAction(listing.id, 'activate')}
-                      disabled={isLoading === listing.id}
-                    >
-                      <CheckCircle className="h-4 w-4" />
-                      Activate
                     </Button>
                   )}
                 </div>
