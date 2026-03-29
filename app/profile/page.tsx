@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Shield, Calendar, Hash, AtSign, User } from 'lucide-react'
+import { getAvatarColor, getInitials, cn } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,10 +25,13 @@ export default async function ProfilePage() {
       <Card>
         <CardHeader className="pb-4">
           <div className="flex items-center gap-4">
-            <Avatar className="h-20 w-20">
+            <Avatar className="h-20 w-20 ring-4 ring-white shadow-lg">
               <AvatarImage src={profile.photo_url || undefined} />
-              <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
-                {profile.first_name?.[0] || 'U'}
+              <AvatarFallback className={cn(
+                "text-white font-bold text-3xl bg-gradient-to-tr",
+                getAvatarColor(profile.first_name || 'User')
+              )}>
+                {getInitials(profile.first_name, profile.last_name)}
               </AvatarFallback>
             </Avatar>
             <div>

@@ -184,6 +184,25 @@ export function ListingForm() {
     })
   }
 
+  const handleNext = async () => {
+    let isValid = false
+    
+    if (step === 1) {
+      isValid = !!form.getValues('listing_type')
+    } else if (step === 2) {
+      isValid = await form.trigger(['title', 'description'])
+    } else if (step === 3) {
+      isValid = !!form.getValues('publishing_mode')
+    }
+    
+    if (isValid) {
+      setStep(step + 1)
+    } else {
+      // Small toast to notify the user there are errors
+      toast.error('Please fix the errors before proceeding')
+    }
+  }
+
   const onSubmit = async (data: ListingFormData) => {
     if (step < 4) {
       if (canProceed()) setStep(step + 1)
@@ -317,16 +336,23 @@ export function ListingForm() {
             <div className="space-y-2">
               <Label htmlFor="title">Title</Label>
               <Input id="title" placeholder="e.g. Luxury Apartment in Downtown" {...form.register('title')} />
+              {form.formState.errors.title && (
+                <p className="text-xs font-medium text-destructive mt-1">{form.formState.errors.title.message}</p>
+              )}
             </div>
+            
             <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
               <Textarea 
                 id="description" 
-                placeholder="Describe property features, location, etc." 
-                className="min-h-[150px] resize-none" 
+                placeholder="Describe property features, location, etc. (English required, no links)" 
+                className={`min-h-[150px] resize-none ${form.formState.errors.description ? 'border-destructive ring-destructive' : ''}`} 
                 {...form.register('description')} 
                 maxLength={1000}
               />
+              {form.formState.errors.description && (
+                <p className="text-xs font-medium text-destructive mt-1">{form.formState.errors.description.message}</p>
+              )}
               <div className="flex justify-end">
                 <span className={`text-xs ${(form.watch('description') || '').length >= 1000 ? 'text-destructive font-bold' : 'text-muted-foreground'}`}>
                   {(form.watch('description') || '').length}/1000
@@ -395,18 +421,39 @@ export function ListingForm() {
               onValueChange={(value: string) => form.setValue('publishing_mode', value as PublishingMode)}
               className="space-y-4"
             >
-              {publishingModes.map((mode) => (
-                <Label
-                  key={mode}
-                  htmlFor={mode}
-                  className={`flex cursor-pointer items-center gap-4 rounded-xl border-2 p-4 ${
-                    form.watch('publishing_mode') === mode ? 'border-primary bg-primary/5' : 'border-border'
-                  }`}
-                >
-                  <RadioGroupItem value={mode} id={mode} />
-                  <span className="font-medium text-lg">{PUBLISHING_MODE_LABELS[mode]}</span>
-                </Label>
-              ))}
+              {publishingModes.map((mode) => {
+                const isDisabled = mode !== 'one_time'
+                return (
+                  <Label
+                    key={mode}
+                    htmlFor={mode}
+                    onClick={(e) => {
+                      if (isDisabled) {
+                        e.preventDefault()
+                        return
+                      }
+                      form.setValue('publishing_mode', mode)
+                    }}
+                    className={`flex items-center gap-4 rounded-xl border-2 p-4 transition-all ${
+                      isDisabled
+                        ? 'cursor-not-allowed border-border opacity-50'
+                        : form.watch('publishing_mode') === mode
+                          ? 'cursor-pointer border-primary bg-primary/5'
+                          : 'cursor-pointer border-border hover:border-primary/50'
+                    }`}
+                  >
+                    <RadioGroupItem value={mode} id={mode} disabled={isDisabled} />
+                    <span className={`font-medium text-lg ${isDisabled ? 'text-muted-foreground' : ''}`}>
+                      {PUBLISHING_MODE_LABELS[mode]}
+                    </span>
+                    {isDisabled && (
+                      <span className="ml-auto text-[10px] font-semibold uppercase tracking-wider text-muted-foreground border border-muted-foreground/30 rounded px-1.5 py-0.5">
+                        Soon
+                      </span>
+                    )}
+                  </Label>
+                )
+              })}
             </RadioGroup>
           </CardContent>
         </Card>
@@ -519,7 +566,7 @@ export function ListingForm() {
             <ArrowLeft className="mr-2 h-4 w-4" /> Back
           </Button>
           {step < 4 ? (
-            <Button type="button" onClick={() => setStep(step + 1)} disabled={!canProceed()}>
+            <Button type="button" onClick={handleNext}>
               Next <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           ) : (
