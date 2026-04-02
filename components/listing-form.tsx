@@ -22,7 +22,12 @@ import { LISTING_TYPE_LABELS, PUBLISHING_MODE_LABELS } from '@/lib/types'
 import type { ListingType, PublishingMode, CTAType, Profile } from '@/lib/types'
 
 const listingSchema = z.object({
-  title: z.string().min(5, 'Title must be at least 5 characters'),
+  title: z.string()
+    .min(5, 'Title must be at least 5 characters')
+    .refine(
+      (val) => !/(https?:\/\/|www\.)[^\s]+|(\b[a-z0-9]+\.[a-z]{2,})/gi.test(val),
+      { message: 'Links and URLs are not allowed in the title' }
+    ),
   description: z.string()
     .min(20, 'Description must be at least 20 characters')
     .max(500, 'Description cannot exceed 500 characters')
@@ -32,7 +37,7 @@ const listingSchema = z.object({
     )
     .refine(
       (val) => /[a-zA-Z]{2,}/.test(val),
-      { message: 'Description must contain at least some English text' }
+      { message: 'Posts can be in any language, but an English translation is required in the description.' }
     ),
   listing_type: z.enum(['custom_offer', 'buyer_request', 'property', 'land', 'project']),
   publishing_mode: z.enum(['one_time', 'ten_times_daily', 'ten_times_every_other_day', 'five_times_weekly']),
