@@ -25,7 +25,7 @@ const listingSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters'),
   description: z.string()
     .min(20, 'Description must be at least 20 characters')
-    .max(1000, 'Description cannot exceed 1000 characters')
+    .max(500, 'Description cannot exceed 500 characters')
     .refine(
       (val) => !/(https?:\/\/|www\.)[^\s]+|(\b[a-z0-9]+\.[a-z]{2,})/gi.test(val),
       { message: 'Links and URLs are not allowed in the description' }
@@ -348,14 +348,14 @@ export function ListingForm() {
                 placeholder="Describe property features, location, etc. (English required, no links)" 
                 className={`min-h-[150px] resize-none ${form.formState.errors.description ? 'border-destructive ring-destructive' : ''}`} 
                 {...form.register('description')} 
-                maxLength={1000}
+                maxLength={500}
               />
               {form.formState.errors.description && (
                 <p className="text-xs font-medium text-destructive mt-1">{form.formState.errors.description.message}</p>
               )}
               <div className="flex justify-end">
-                <span className={`text-xs ${(form.watch('description') || '').length >= 1000 ? 'text-destructive font-bold' : 'text-muted-foreground'}`}>
-                  {(form.watch('description') || '').length}/1000
+                <span className={`text-xs ${(form.watch('description') || '').length >= 500 ? 'text-destructive font-bold' : 'text-muted-foreground'}`}>
+                  {(form.watch('description') || '').length}/500
                 </span>
               </div>
             </div>
