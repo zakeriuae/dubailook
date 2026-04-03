@@ -36,7 +36,7 @@ export default async function AdminPage() {
   const totalImpressions = allListings.reduce((acc, l) => acc + (l.listing_stats?.list_impressions || 0), 0)
 
   return (
-    <div className="space-y-8">
+    <div className="max-w-full space-y-8 overflow-x-hidden px-1 sm:px-0">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground md:text-3xl">Admin Dashboard</h1>

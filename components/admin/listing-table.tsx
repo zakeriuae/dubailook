@@ -278,8 +278,8 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
                 </div>
                 <div className="min-w-0 flex-1 flex flex-col justify-between min-h-[56px]">
                   <div>
-                    <div className="flex items-start justify-between gap-1">
-                      <p className="font-bold text-[13px] leading-tight text-foreground line-clamp-2 pr-1">
+                    <div className="flex min-w-0 items-start justify-between gap-1">
+                      <p className="min-w-0 flex-1 break-words pb-0.5 text-[13px] font-bold leading-tight text-foreground line-clamp-2">
                         {listing.title}
                       </p>
                       <Badge variant="outline" className="shrink-0 text-[10px] lowercase font-medium px-1.5 py-0 h-4 border-emerald-200 text-emerald-700 bg-emerald-50">
@@ -303,9 +303,9 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
                             <span className="text-[10px] text-muted-foreground font-medium truncate max-w-[60px]">{listing.user.first_name}</span>
                           </div>
                         )}
-                        <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                          <Eye className="h-2.5 w-2.5" />
-                          {listing.listing_stats?.page_views || 0}
+                        <div className="flex min-w-0 items-center gap-1 text-[10px] text-muted-foreground">
+                          <Eye className="h-2.5 w-2.5 shrink-0" />
+                          <span className="truncate">{listing.listing_stats?.page_views || 0}</span>
                         </div>
                       </div>
                       
@@ -323,10 +323,10 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
                 </div>
               </div>
               
-              <div className="mt-2.5 flex items-center justify-between text-[10px] text-muted-foreground bg-muted/30 p-1.5 rounded-lg border border-border/50">
-                <div className="flex items-center gap-1.5">
-                  <Send className="h-3 w-3" />
-                  <span className="font-medium">
+              <div className="mt-2.5 flex items-center justify-between gap-2 rounded-lg border border-border/50 bg-muted/30 p-1.5 text-[10px] text-muted-foreground">
+                <div className="flex min-w-0 items-center gap-1.5">
+                  <Send className="h-3 w-3 shrink-0" />
+                  <span className="truncate font-medium">
                     {(() => {
                       const latest = listing.listing_schedules
                         ?.filter(s => s.is_completed && s.published_at)
@@ -335,7 +335,7 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
                     })()}
                   </span>
                 </div>
-                <div className="flex items-center gap-1.5">
+                <div className="flex shrink-0 items-center gap-1.5">
                   <Clock className="h-3 w-3" />
                   {new Date(listing.created_at).toLocaleDateString()}
                 </div>
