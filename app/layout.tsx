@@ -1,10 +1,60 @@
 import type { Metadata, Viewport } from 'next'
+import localFont from 'next/font/local'
 import { Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from 'sonner'
 import './globals.css'
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ 
+  subsets: ["latin"],
+  variable: '--font-inter',
+});
+
+const yekanBakh = localFont({
+  src: [
+    {
+      path: '../public/fonts/YekanBakhFaNum-Thin.woff2',
+      weight: '100',
+      style: 'normal',
+    },
+    {
+      path: '../public/fonts/YekanBakhFaNum-Light.woff2',
+      weight: '300',
+      style: 'normal',
+    },
+    {
+      path: '../public/fonts/YekanBakhFaNum-Regular.woff2',
+      weight: '400',
+      style: 'normal',
+    },
+    {
+      path: '../public/fonts/YekanBakhFaNum-SemiBold.woff2',
+      weight: '600',
+      style: 'normal',
+    },
+    {
+      path: '../public/fonts/YekanBakhFaNum-Bold.woff2',
+      weight: '700',
+      style: 'normal',
+    },
+    {
+      path: '../public/fonts/YekanBakhFaNum-ExtraBold.woff2',
+      weight: '800',
+      style: 'normal',
+    },
+    {
+      path: '../public/fonts/YekanBakhFaNum-Black.woff2',
+      weight: '900',
+      style: 'normal',
+    },
+    {
+      path: '../public/fonts/YekanBakhFaNum-ExtraBlack.woff2',
+      weight: '950',
+      style: 'normal',
+    },
+  ],
+  variable: '--font-yekan-bakh',
+})
 
 export const metadata: Metadata = {
   title: 'Dubilook - Property Listings Platform',
@@ -43,7 +93,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body className={`${inter.className} antialiased selection:bg-primary/10`}>
+      <body className={`${yekanBakh.variable} ${inter.variable} font-yekan-bakh antialiased selection:bg-primary/10`}>
         <AuthProvider initialProfile={profile}>
           <AppLayout>
             {children}

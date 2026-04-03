@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
+import { FormattedText } from '@/components/formatted-text'
 import { createClient } from '@/lib/supabase/server'
 import { getSession } from '@/lib/session'
 import { Button } from '@/components/ui/button'
@@ -177,7 +178,10 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
             <Card className="mt-6 border-x-0 rounded-none md:border-x md:rounded-xl shadow-none md:shadow-sm">
               <CardContent className="pt-4 md:pt-6">
                 <h2 className="mb-4 text-lg font-semibold">Description</h2>
-                <p className="whitespace-pre-wrap break-words text-sm md:text-base text-muted-foreground">{listing.description}</p>
+                <FormattedText 
+                  text={listing.description} 
+                  className="text-sm md:text-base text-muted-foreground whitespace-pre-wrap break-words"
+                />
                 
                 <div className="mt-12 border-t pt-6 text-center text-[10px] italic text-muted-foreground">
                   ©Copyright 2026 | All Rights Reserved, DUBILOOK™

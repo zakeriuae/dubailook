@@ -5,11 +5,12 @@ import Image from 'next/image'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Building2, LandPlot, Briefcase, Package, Users, Eye, MessageCircle, ExternalLink, Phone } from 'lucide-react'
+import { Building2, LandPlot, Briefcase, Package, Users, Eye, MessageCircle, ExternalLink, Phone, Clock } from 'lucide-react'
 import type { Listing, ListingCTA } from '@/lib/types'
 import { LISTING_TYPE_LABELS, LISTING_STATUS_LABELS } from '@/lib/types'
+import { FormattedText } from '@/components/formatted-text'
 import { formatRelativeDate } from '@/lib/utils'
-import { Clock } from 'lucide-react'
+import { getOptimizedImageUrl } from '@/lib/storage'
 
 interface ListingCardProps {
   listing: Listing
@@ -65,8 +66,6 @@ function CTAButton({ cta }: { cta: ListingCTA }) {
   )
 }
 
-import { getOptimizedImageUrl } from '@/lib/storage'
-
 export function ListingCard({ listing, showStatus = false, showStats = false }: ListingCardProps) {
   return (
     <Card className="group overflow-hidden transition-all hover:shadow-lg p-0">
@@ -110,7 +109,10 @@ export function ListingCard({ listing, showStatus = false, showStats = false }: 
       </CardHeader>
       
       <CardContent className="px-3 pb-2 pt-0">
-        <p className="line-clamp-2 text-xs text-muted-foreground leading-relaxed break-words">{listing.description}</p>
+        <FormattedText 
+          text={listing.description} 
+          className="line-clamp-2 text-xs text-muted-foreground leading-relaxed break-words"
+        />
         
         {showStats && listing.listing_stats && (
           <div className="mt-2 flex items-center gap-3 text-[10px] text-muted-foreground">
