@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
+import { MarqueeTitle } from '@/components/marquee-title'
 import { createClient } from '@/lib/supabase/server'
 import { getSession } from '@/lib/session'
 import { Button } from '@/components/ui/button'
@@ -93,7 +94,10 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
             <ArrowLeft className="h-5 w-5" />
           </Link>
         </Button>
-        <span className="flex-1 text-sm font-bold truncate px-2 text-center md:text-left">{listing.title}</span>
+        <MarqueeTitle 
+          title={listing.title} 
+          className="text-sm font-bold px-2 text-center" 
+        />
         <Button variant="ghost" size="icon" className="h-9 w-9">
           <Share2 className="h-5 w-5" />
         </Button>

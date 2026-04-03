@@ -24,9 +24,14 @@ import type { ListingType, PublishingMode, CTAType, Profile } from '@/lib/types'
 const listingSchema = z.object({
   title: z.string()
     .min(5, 'Title must be at least 5 characters')
+    .max(60, 'Title cannot exceed 60 characters')
     .refine(
       (val) => !/(https?:\/\/|www\.)[^\s]+|(\b[a-z0-9]+\.[a-z]{2,})/gi.test(val),
       { message: 'Links and URLs are not allowed in the title' }
+    )
+    .refine(
+      (val) => !/(\b\d{7,15}\b)|(\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9})/.test(val),
+      { message: 'Phone numbers are not allowed in the title' }
     ),
   description: z.string()
     .min(20, 'Description must be at least 20 characters')
@@ -246,7 +251,7 @@ export function ListingForm() {
   const canProceed = () => {
     switch (step) {
       case 1: return !!form.watch('listing_type')
-      case 2: return form.watch('title').length >= 5 && form.watch('description').length >= 20
+      case 2: return form.watch('title').length >= 5 && form.watch('title').length <= 60 && form.watch('description').length >= 20
       case 3: return !!form.watch('publishing_mode')
       case 4: return whatsapp.enabled || telegram.enabled || url.enabled
       default: return false
@@ -324,8 +329,13 @@ export function ListingForm() {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="title">Title</Label>
-              <Input id="title" placeholder="e.g. Luxury Apartment in Downtown" {...form.register('title')} />
+              <div className="flex justify-between items-end">
+                <Label htmlFor="title">Title</Label>
+                <span className={`text-[10px] ${(form.watch('title') || '').length > 60 ? 'text-destructive font-bold' : 'text-muted-foreground'}`}>
+                  {(form.watch('title') || '').length}/60
+                </span>
+              </div>
+              <Input id="title" placeholder="Summarize your offer (No phone/links)" {...form.register('title')} maxLength={60} />
               {form.formState.errors.title && (
                 <p className="text-xs font-medium text-destructive mt-1">{form.formState.errors.title.message}</p>
               )}
