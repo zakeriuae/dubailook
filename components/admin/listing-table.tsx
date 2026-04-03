@@ -28,7 +28,7 @@ import {
 } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
-import { CheckCircle, XCircle, Send, Eye, ExternalLink } from 'lucide-react'
+import { CheckCircle, XCircle, Send, Eye, ExternalLink, Clock } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { LISTING_TYPE_LABELS } from '@/lib/types'
@@ -257,12 +257,12 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
       </div>
 
       {/* Mobile Card List View */}
-      <div className="space-y-4 md:hidden">
+      <div className="space-y-3 md:hidden">
         {listings.map((listing) => (
-          <Card key={listing.id} className="overflow-hidden border-none shadow-sm ring-1 ring-border">
-            <CardContent className="p-4">
+          <Card key={listing.id} className="overflow-hidden border-none shadow-sm ring-1 ring-border rounded-xl">
+            <CardContent className="p-3">
               <div className="flex items-start gap-3">
-                <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-muted">
+                <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-muted border">
                   {listing.image_url ? (
                     <Image
                       src={getOptimizedImageUrl(listing.image_url, { width: 100 })}
@@ -271,103 +271,110 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
                       className="object-cover"
                     />
                   ) : (
-                    <div className="flex h-full items-center justify-center text-[10px] text-muted-foreground text-center px-1">
-                      No image
+                    <div className="flex h-full items-center justify-center text-[8px] text-muted-foreground text-center px-1">
+                      No img
                     </div>
                   )}
                 </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-start justify-between gap-2">
-                    <p className="font-bold text-sm leading-tight text-foreground line-clamp-2">
-                      {listing.title}
-                    </p>
-                    <Badge variant="outline" className="shrink-0 text-[10px] uppercase font-bold tracking-tighter scale-90 origin-top-right">
-                      {LISTING_TYPE_LABELS[listing.listing_type]}
-                    </Badge>
-                  </div>
-                  
-                  <div className="mt-2 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      {listing.user && (
-                        <div className="flex items-center gap-1.5">
-                          <Avatar className="h-5 w-5 ring-1 ring-white">
-                            <AvatarImage src={listing.user.photo_url || undefined} />
-                            <AvatarFallback className={cn(
-                              "text-white font-bold text-[8px] bg-gradient-to-tr",
-                              getAvatarColor(listing.user.first_name || 'User')
-                            )}>
-                              {getInitials(listing.user.first_name, listing.user.last_name)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="text-[11px] text-muted-foreground font-medium truncate max-w-[70px]">{listing.user.first_name}</span>
-                        </div>
-                      )}
-                      <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
-                        <Eye className="h-3 w-3" />
-                        {listing.listing_stats?.page_views || 0}
-                      </div>
+                <div className="min-w-0 flex-1 flex flex-col justify-between min-h-[56px]">
+                  <div>
+                    <div className="flex items-start justify-between gap-1">
+                      <p className="font-bold text-[13px] leading-tight text-foreground line-clamp-2 pr-1">
+                        {listing.title}
+                      </p>
+                      <Badge variant="outline" className="shrink-0 text-[10px] lowercase font-medium px-1.5 py-0 h-4 border-emerald-200 text-emerald-700 bg-emerald-50">
+                        {LISTING_TYPE_LABELS[listing.listing_type]}
+                      </Badge>
                     </div>
                     
-                    <div className="flex items-center gap-1.5">
-                      <Label className="text-[10px] text-muted-foreground uppercase font-bold">Active</Label>
-                      <Switch 
-                        checked={listing.status !== 'deactivated'}
-                        onCheckedChange={(checked) => handleAction(listing.id, checked ? 'activate' : 'deactivate')}
-                        disabled={isLoading === listing.id}
-                        className="scale-90"
-                      />
+                    <div className="mt-1.5 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {listing.user && (
+                          <div className="flex items-center gap-1">
+                            <Avatar className="h-4 w-4">
+                              <AvatarImage src={listing.user.photo_url || undefined} />
+                              <AvatarFallback className={cn(
+                                "text-white font-bold text-[6px] bg-gradient-to-tr",
+                                getAvatarColor(listing.user.first_name || 'User')
+                              )}>
+                                {getInitials(listing.user.first_name, listing.user.last_name)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="text-[10px] text-muted-foreground font-medium truncate max-w-[60px]">{listing.user.first_name}</span>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                          <Eye className="h-2.5 w-2.5" />
+                          {listing.listing_stats?.page_views || 0}
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-1">
+                        <Label className="text-[9px] text-muted-foreground uppercase font-bold">Active</Label>
+                        <Switch 
+                          checked={listing.status !== 'deactivated'}
+                          onCheckedChange={(checked) => handleAction(listing.id, checked ? 'activate' : 'deactivate')}
+                          disabled={isLoading === listing.id}
+                          className="scale-75 origin-right"
+                        />
+                      </div>
                     </div>
                   </div>
-                  
-                  <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                      <Send className="h-3 w-3" />
-                      {(() => {
-                        const latest = listing.listing_schedules
-                          ?.filter(s => s.is_completed && s.published_at)
-                          .reduce((acc, s) => !acc || new Date(s.published_at!) > new Date(acc) ? s.published_at : acc, null as string | null);
-                        return formatRelativeDate(latest);
-                      })()}
-                    </div>
-                    <div>{new Date(listing.created_at).toLocaleDateString()}</div>
-                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-2.5 flex items-center justify-between text-[10px] text-muted-foreground bg-muted/30 p-1.5 rounded-lg border border-border/50">
+                <div className="flex items-center gap-1.5">
+                  <Send className="h-3 w-3" />
+                  <span className="font-medium">
+                    {(() => {
+                      const latest = listing.listing_schedules
+                        ?.filter(s => s.is_completed && s.published_at)
+                        .reduce((acc, s) => !acc || new Date(s.published_at!) > new Date(acc) ? s.published_at : acc, null as string | null);
+                      return formatRelativeDate(latest);
+                    })()}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Clock className="h-3 w-3" />
+                  {new Date(listing.created_at).toLocaleDateString()}
                 </div>
               </div>
 
               {/* Mobile Actions */}
-              <div className="mt-4 flex items-center justify-between gap-2 border-t pt-3">
-                <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-blue-600" asChild>
+              <div className="mt-3 flex items-center justify-between gap-2 border-t pt-2.5">
+                <Button variant="ghost" size="sm" className="h-8 gap-1 text-[11px] text-blue-600 px-2" asChild>
                   <Link href={`/listings/${listing.id}`}>
-                    <ExternalLink className="h-4 w-4" />
-                    Details
+                    <Eye className="h-3.5 w-3.5" />
+                    Preview
                   </Link>
                 </Button>
 
-                <div className="flex items-center gap-2">
+                <div className="flex-1 flex items-center justify-end gap-1.5">
                   {showActions && (
                     <>
                       <Button
                         size="sm"
                         variant="outline"
-                        className="h-9 gap-1.5 border-emerald-200 text-emerald-600 bg-emerald-50/50"
+                        className="h-8 gap-1 border-emerald-200 text-emerald-600 bg-emerald-50 text-[11px] px-2.5"
                         onClick={() => handleAction(listing.id, 'approve')}
                         disabled={isLoading === listing.id}
                       >
                         {isLoading === listing.id ? (
-                          <Spinner className="h-4 w-4" />
+                          <Spinner className="h-3 w-3" />
                         ) : (
-                          <CheckCircle className="h-4 w-4" />
+                          <CheckCircle className="h-3.5 w-3.5" />
                         )}
                         Approve
                       </Button>
                       <Button
                         size="sm"
                         variant="outline"
-                        className="h-9 gap-1.5 border-red-200 text-red-600 bg-red-50/50"
+                        className="h-8 gap-1 border-red-200 text-red-600 bg-red-50 text-[11px] px-2.5"
                         onClick={() => openRejectDialog(listing)}
                         disabled={isLoading === listing.id}
                       >
-                        <XCircle className="h-4 w-4" />
+                        <XCircle className="h-3.5 w-3.5" />
                         Reject
                       </Button>
                     </>
@@ -376,14 +383,14 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
                   {showPublishAction && (
                     <Button
                       size="sm"
-                      className="h-9 gap-1.5 px-4"
+                      className="h-8 gap-1.5 px-4 text-[11px] font-bold"
                       onClick={() => handleAction(listing.id, 'publish')}
                       disabled={isLoading === listing.id}
                     >
                       {isLoading === listing.id ? (
-                        <Spinner className="h-4 w-4" />
+                        <Spinner className="h-3.5 w-3.5" />
                       ) : (
-                        <Send className="h-4 w-4" />
+                        <Send className="h-3.5 w-3.5" />
                       )}
                       Publish Now
                     </Button>
@@ -393,14 +400,14 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
                     <Button
                       size="sm"
                       variant="outline"
-                      className="h-9 flex-1 gap-1.5 border-blue-200 text-blue-600 bg-blue-50/50"
+                      className="h-8 gap-1.5 border-blue-200 text-blue-600 bg-blue-50 text-[11px] px-4 font-bold flex-1 max-w-[120px]"
                       onClick={() => handleAction(listing.id, 'repost')}
                       disabled={isLoading === listing.id}
                     >
                       {isLoading === listing.id ? (
-                        <Spinner className="h-4 w-4" />
+                        <Spinner className="h-3.5 w-3.5" />
                       ) : (
-                        <Send className="h-4 w-4" />
+                        <Send className="h-3.5 w-3.5" />
                       )}
                       Repost
                     </Button>

@@ -92,23 +92,25 @@ export default async function AdminPage() {
 
       {/* Listings Tabs */}
       <Tabs defaultValue="pending" className="space-y-6">
-        <TabsList className="grid h-auto w-full grid-cols-3 gap-2 bg-transparent p-0 lg:flex lg:w-auto lg:grid-cols-none lg:bg-muted lg:p-1">
-          <TabsTrigger value="pending" className="flex items-center justify-center gap-2 rounded-lg border bg-card py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground lg:border-none lg:bg-transparent lg:py-1.5">
-            <Clock className="h-4 w-4 shrink-0" />
-            <span className="text-xs font-medium sm:text-sm">Pending</span>
-            <Badge variant="secondary" className="ml-0.5 h-5 px-1.5 text-[10px]">{pendingListings.length}</Badge>
-          </TabsTrigger>
-          <TabsTrigger value="published" className="flex items-center justify-center gap-2 rounded-lg border bg-card py-2.5 data-[state=active]:bg-emerald-600 data-[state=active]:text-white lg:border-none lg:bg-transparent lg:py-1.5">
-            <Send className="h-4 w-4 shrink-0" />
-            <span className="text-xs font-medium sm:text-sm">Published</span>
-            <Badge variant="secondary" className="ml-0.5 h-5 px-1.5 text-[10px]">{publishedListings.length}</Badge>
-          </TabsTrigger>
-          <TabsTrigger value="rejected" className="flex items-center justify-center gap-2 rounded-lg border bg-card py-2.5 data-[state=active]:bg-destructive data-[state=active]:text-destructive-foreground lg:border-none lg:bg-transparent lg:py-1.5">
-            <XCircle className="h-4 w-4 shrink-0" />
-            <span className="text-xs font-medium sm:text-sm">Rejected</span>
-            <Badge variant="secondary" className="ml-0.5 h-5 px-1.5 text-[10px]">{rejectedListings.length}</Badge>
-          </TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto pb-4 hide-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
+          <TabsList className="flex w-max min-w-full lg:w-auto h-auto gap-2 bg-transparent p-0 lg:bg-muted lg:p-1 lg:flex lg:grid-cols-none">
+            <TabsTrigger value="pending" className="flex items-center justify-center gap-2 rounded-lg border bg-card py-2.5 px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground lg:border-none lg:bg-transparent lg:py-1.5 lg:px-3 shadow-sm lg:shadow-none">
+              <Clock className="h-4 w-4 shrink-0" />
+              <span className="text-xs font-medium sm:text-sm">Pending</span>
+              <Badge variant="secondary" className="ml-0.5 h-5 px-1.5 text-[10px]">{pendingListings.length}</Badge>
+            </TabsTrigger>
+            <TabsTrigger value="published" className="flex items-center justify-center gap-2 rounded-lg border bg-card py-2.5 px-4 data-[state=active]:bg-emerald-600 data-[state=active]:text-white lg:border-none lg:bg-transparent lg:py-1.5 lg:px-3 shadow-sm lg:shadow-none">
+              <Send className="h-4 w-4 shrink-0" />
+              <span className="text-xs font-medium sm:text-sm">Published</span>
+              <Badge variant="secondary" className="ml-0.5 h-5 px-1.5 text-[10px]">{publishedListings.length}</Badge>
+            </TabsTrigger>
+            <TabsTrigger value="rejected" className="flex items-center justify-center gap-2 rounded-lg border bg-card py-2.5 px-4 data-[state=active]:bg-destructive data-[state=active]:text-destructive-foreground lg:border-none lg:bg-transparent lg:py-1.5 lg:px-3 shadow-sm lg:shadow-none">
+              <XCircle className="h-4 w-4 shrink-0" />
+              <span className="text-xs font-medium sm:text-sm">Rejected</span>
+              <Badge variant="secondary" className="ml-0.5 h-5 px-1.5 text-[10px]">{rejectedListings.length}</Badge>
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="pending">
           <Card>
