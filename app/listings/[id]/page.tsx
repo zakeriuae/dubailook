@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { MarqueeTitle } from '@/components/marquee-title'
 import { createClient } from '@/lib/supabase/server'
 import { getSession } from '@/lib/session'
 import { Button } from '@/components/ui/button'
@@ -96,11 +95,14 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
             </Link>
           </Button>
         </div>
-        <div className="min-w-0 max-w-[calc(100vw-120px)] flex justify-center overflow-hidden">
-          <MarqueeTitle 
-            title={listing.title} 
-            className="text-sm font-bold" 
-          />
+        <div className="flex justify-center overflow-hidden">
+          <Link href="/">
+            <img 
+              src="/logo.png" 
+              alt="Dubilook" 
+              className="h-7 w-auto object-contain"
+            />
+          </Link>
         </div>
         <div className="flex items-center justify-end">
           <Button variant="ghost" size="icon" className="h-9 w-9">
