@@ -30,7 +30,7 @@ export default async function HomePage() {
           Property Listings
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Browse our latest properties, land, and real estate projects
+          Latest properties, land, and real estate projects
         </p>
       </div>
       
