@@ -68,8 +68,7 @@ export function ListingForm() {
   const [step, setStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isUploading, setIsUploading] = useState(false) // For global upload state
-  const [imageUrls, setImageUrls] = useState<string[]>([])
-  const [uploadingMap, setUploadingMap] = useState<Record<number, boolean>>({}) // Track per-image upload state
+  const [images, setImages] = useState<{ id: string; url?: string; uploading: boolean }[]>([])
   
   const [whatsapp, setWhatsapp] = useState<ContactMethod>({ enabled: false, value: '' })
   const [telegram, setTelegram] = useState<ContactMethod>({ enabled: false, value: '' })
@@ -118,75 +117,61 @@ export function ListingForm() {
       return
     }
 
-    const supabase = createClient()
-    const startIndex = imageUrls.length
+    const availableSlots = 5 - images.length
+    const filesToUpload = files.slice(0, availableSlots)
     
-    // Add placeholders to show previews immediately (mock)
-    const newUrls = [...imageUrls]
-    const newUploadingMap = { ...uploadingMap }
-    
-    for (let i = 0; i < files.length && (startIndex + i) < 5; i++) {
-        const file = files[i]
-        const currentIndex = startIndex + i
-        
-        // Show local preview immediately
-        const reader = new FileReader()
-        reader.onloadend = () => {
-            // We use the same array to manage order
-        }
-        reader.readAsDataURL(file)
-
-        // Start upload
-        newUploadingMap[currentIndex] = true
-        setUploadingMap({ ...newUploadingMap })
-        
-        try {
-            const formData = new FormData()
-            formData.append('file', file)
-
-            const res = await fetch('/api/upload', {
-                method: 'POST',
-                body: formData,
-            })
-
-            if (!res.ok) {
-                const errorData = await res.json()
-                throw new Error(errorData.error || 'Upload failed')
-            }
-
-            const { publicUrl } = await res.json()
-
-            setImageUrls(prev => {
-                const updated = [...prev]
-                updated[currentIndex] = publicUrl
-                return updated
-            })
-        } catch (err) {
-            console.error('Upload failed:', err)
-            toast.error(`Failed to upload ${file.name}`)
-        } finally {
-            setUploadingMap(prev => {
-                const updated = { ...prev }
-                delete updated[currentIndex]
-                return updated
-            })
-        }
+    if (filesToUpload.length === 0) {
+      toast.error('You can only upload up to 5 photos')
+      return
     }
+
+    // 1. Create slots for the new files immediately
+    const newSlots = filesToUpload.map(() => ({
+      id: Math.random().toString(36).substring(7),
+      uploading: true,
+    }))
+
+    setImages(prev => [...prev, ...newSlots])
+
+    // 2. Start all uploads in parallel
+    filesToUpload.forEach(async (file, i) => {
+      const slotId = newSlots[i].id
+      
+      try {
+        const formData = new FormData()
+        formData.append('file', file)
+
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        })
+
+        if (!res.ok) {
+          const errorData = await res.json()
+          throw new Error(errorData.error || 'Upload failed')
+        }
+
+        const { publicUrl } = await res.json()
+
+        setImages(prev => prev.map(slot => 
+          slot.id === slotId 
+            ? { ...slot, url: publicUrl, uploading: false } 
+            : slot
+        ))
+      } catch (err) {
+        console.error('Upload failed:', err)
+        toast.error(`Failed to upload ${file.name}`)
+        // Remove the failed slot
+        setImages(prev => prev.filter(slot => slot.id !== slotId))
+      }
+    })
+    
+    // Clear input so same file can be selected again if needed
+    e.target.value = ''
   }
 
-  const removeImage = (index: number) => {
-    setImageUrls(prev => {
-        const updated = [...prev]
-        updated.splice(index, 1)
-        return updated
-    })
-    
-    // Also clean up uploading map if needed
-    setUploadingMap(prev => {
-        const updated = { ...prev }
-        delete updated[index]
-        return updated
-    })
+  const removeImage = (id: string) => {
+    setImages(prev => prev.filter(slot => slot.id !== id))
   }
 
   const handleNext = async () => {
@@ -224,7 +209,7 @@ export function ListingForm() {
       return
     }
 
-    if (Object.keys(uploadingMap).length > 0) {
+    if (images.some(img => img.uploading)) {
         toast.error('Please wait for images to finish uploading')
         return
     }
@@ -235,7 +220,7 @@ export function ListingForm() {
       formData.append('data', JSON.stringify({ 
         ...data, 
         ctas: activeCtas,
-        image_urls: imageUrls.filter(Boolean) // Send the uploaded URLs
+        image_urls: images.map(img => img.url).filter(Boolean) as string[] // Send the uploaded URLs
       }))
       
       const res = await fetch('/api/listings', {
@@ -367,25 +352,25 @@ export function ListingForm() {
             <div className="space-y-3">
               <Label className="flex justify-between">
                 <span>Photos <span className="text-muted-foreground font-normal">(Optional)</span></span>
-                <span className="text-xs text-muted-foreground">{imageUrls.length}/5</span>
+                <span className="text-xs text-muted-foreground">{images.length}/5</span>
               </Label>
               <div className="flex flex-wrap gap-3">
-                {imageUrls.map((url, i) => (
-                  <div key={i} className="relative group h-24 w-24 overflow-hidden rounded-xl border bg-muted shadow-sm">
-                    {uploadingMap[i] ? (
+                {images.map((img) => (
+                  <div key={img.id} className="relative group h-24 w-24 overflow-hidden rounded-xl border bg-muted shadow-sm">
+                    {img.uploading ? (
                         <div className="flex h-full w-full items-center justify-center bg-background/50 backdrop-blur-[2px]">
                             <Spinner className="h-5 w-5 text-primary" />
                         </div>
                     ) : (
                         <>
                             <img 
-                                src={url} 
+                                src={img.url} 
                                 className="h-full w-full object-cover transition-transform group-hover:scale-110" 
                                 alt="" 
                             />
                             <button 
                                 type="button" 
-                                onClick={() => removeImage(i)} 
+                                onClick={() => removeImage(img.id)} 
                                 className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-destructive"
                             >
                                 <X className="h-4 w-4" />
@@ -394,7 +379,7 @@ export function ListingForm() {
                     )}
                   </div>
                 ))}
-                {imageUrls.length < 5 && (
+                {images.length < 5 && (
                   <label className="flex h-24 w-24 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-muted-foreground/25 transition-colors hover:border-primary hover:bg-primary/5">
                     <Upload className="h-6 w-6 text-muted-foreground" />
                     <span className="mt-1 text-[10px] text-muted-foreground font-medium">Add Photo</span>
@@ -404,7 +389,6 @@ export function ListingForm() {
                         accept="image/*" 
                         className="hidden" 
                         onChange={handleImagesChange}
-                        disabled={Object.keys(uploadingMap).length > 0} 
                     />
                   </label>
                 )}

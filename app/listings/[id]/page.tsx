@@ -93,7 +93,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
             <ArrowLeft className="h-5 w-5" />
           </Link>
         </Button>
-        <span className="text-sm font-bold truncate max-w-[200px]">{listing.title}</span>
+        <span className="flex-1 text-sm font-bold truncate px-2 text-center md:text-left">{listing.title}</span>
         <Button variant="ghost" size="icon" className="h-9 w-9">
           <Share2 className="h-5 w-5" />
         </Button>
@@ -131,7 +131,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
               )}
             </div>
 
-            <div className="mt-6 px-4 md:px-0">
+            <div className="mt-4 px-6 md:px-0">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge className="gap-1">
                   {typeIcons[listing.listing_type]}
@@ -144,7 +144,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                 )}
               </div>
               
-              <h1 className="mt-4 text-2xl font-bold tracking-tight text-foreground md:text-3xl">
+              <h1 className="mt-2 text-xl font-bold tracking-tight text-foreground md:text-3xl">
                 {listing.title}
               </h1>
 
@@ -165,7 +165,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
             <Card className="mt-6 border-x-0 rounded-none md:border-x md:rounded-xl shadow-none md:shadow-sm">
               <CardContent className="pt-4 md:pt-6">
                 <h2 className="mb-4 text-lg font-semibold">Description</h2>
-                <p className="whitespace-pre-wrap text-muted-foreground">{listing.description}</p>
+                <p className="whitespace-pre-wrap break-words text-sm md:text-base text-muted-foreground">{listing.description}</p>
                 
                 <div className="mt-12 border-t pt-6 text-center text-[10px] italic text-muted-foreground">
                   ©Copyright 2026 | All Rights Reserved, DUBILOOK™
