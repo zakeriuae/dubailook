@@ -112,41 +112,17 @@ export default async function AdminPage() {
           </TabsList>
         </div>
 
-        <TabsContent value="pending">
-          <Card>
-            <CardHeader>
-              <CardTitle>Pending Review</CardTitle>
-              <CardDescription>Listings awaiting admin approval</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <AdminListingTable listings={pendingListings} showActions />
-            </CardContent>
-          </Card>
+        <TabsContent value="pending" className="mt-0">
+          <AdminListingTable listings={pendingListings} showActions />
         </TabsContent>
 
 
-        <TabsContent value="published">
-          <Card>
-            <CardHeader>
-              <CardTitle>Published Listings</CardTitle>
-              <CardDescription>Currently live listings</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <AdminListingTable listings={publishedListings} />
-            </CardContent>
-          </Card>
+        <TabsContent value="published" className="mt-0">
+          <AdminListingTable listings={publishedListings} />
         </TabsContent>
 
-        <TabsContent value="rejected">
-          <Card>
-            <CardHeader>
-              <CardTitle>Rejected Listings</CardTitle>
-              <CardDescription>Listings that were not approved</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <AdminListingTable listings={rejectedListings} />
-            </CardContent>
-          </Card>
+        <TabsContent value="rejected" className="mt-0">
+          <AdminListingTable listings={rejectedListings} />
         </TabsContent>
       </Tabs>
     </div>

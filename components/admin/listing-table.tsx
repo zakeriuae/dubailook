@@ -342,21 +342,21 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
               </div>
 
               {/* Mobile Actions */}
-              <div className="mt-3 flex items-center justify-between gap-2 border-t pt-2.5">
-                <Button variant="ghost" size="sm" className="h-8 gap-1 text-[11px] text-blue-600 px-2" asChild>
+              <div className="mt-3 flex items-center justify-between gap-1.5 border-t pt-2.5">
+                <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-[10px] text-blue-600 px-1.5" asChild>
                   <Link href={`/listings/${listing.id}`}>
                     <Eye className="h-3.5 w-3.5" />
                     Preview
                   </Link>
                 </Button>
 
-                <div className="flex-1 flex items-center justify-end gap-1.5">
+                <div className="flex-1 flex max-w-[200px] items-center justify-end gap-1">
                   {showActions && (
-                    <>
+                    <div className="flex items-center gap-1">
                       <Button
                         size="sm"
                         variant="outline"
-                        className="h-8 gap-1 border-emerald-200 text-emerald-600 bg-emerald-50 text-[11px] px-2.5"
+                        className="h-8 flex-1 gap-1 border-emerald-200 text-emerald-600 bg-emerald-50 text-[10px] px-1.5 font-bold"
                         onClick={() => handleAction(listing.id, 'approve')}
                         disabled={isLoading === listing.id}
                       >
@@ -370,20 +370,20 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
                       <Button
                         size="sm"
                         variant="outline"
-                        className="h-8 gap-1 border-red-200 text-red-600 bg-red-50 text-[11px] px-2.5"
+                        className="h-8 flex-1 gap-1 border-red-200 text-red-600 bg-red-50 text-[10px] px-1.5 font-bold"
                         onClick={() => openRejectDialog(listing)}
                         disabled={isLoading === listing.id}
                       >
                         <XCircle className="h-3.5 w-3.5" />
                         Reject
                       </Button>
-                    </>
+                    </div>
                   )}
 
                   {showPublishAction && (
                     <Button
                       size="sm"
-                      className="h-8 gap-1.5 px-4 text-[11px] font-bold"
+                      className="h-8 flex-1 gap-1.5 px-3 text-[10px] font-bold shadow-sm"
                       onClick={() => handleAction(listing.id, 'publish')}
                       disabled={isLoading === listing.id}
                     >
@@ -392,7 +392,7 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
                       ) : (
                         <Send className="h-3.5 w-3.5" />
                       )}
-                      Publish Now
+                      Publish
                     </Button>
                   )}
 
@@ -400,7 +400,7 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
                     <Button
                       size="sm"
                       variant="outline"
-                      className="h-8 gap-1.5 border-blue-200 text-blue-600 bg-blue-50 text-[11px] px-4 font-bold flex-1 max-w-[120px]"
+                      className="h-8 flex-1 min-w-[80px] gap-1.5 border-blue-200 text-blue-600 bg-blue-50 text-[10px] px-2 font-bold shadow-sm"
                       onClick={() => handleAction(listing.id, 'repost')}
                       disabled={isLoading === listing.id}
                     >
