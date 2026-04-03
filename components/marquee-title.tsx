@@ -28,7 +28,7 @@ export function MarqueeTitle({ title, className }: MarqueeTitleProps) {
   return (
     <div 
       ref={containerRef} 
-      className={cn("flex-1 overflow-hidden whitespace-nowrap", className)}
+      className={cn("flex-1 min-w-0 px-2 overflow-hidden whitespace-nowrap", className)}
     >
       <div className={cn(
         "inline-block",

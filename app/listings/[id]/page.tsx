@@ -148,7 +148,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                 )}
               </div>
               
-              <h1 className="mt-2 text-xl font-bold tracking-tight text-foreground md:text-3xl">
+              <h1 className="mt-2 text-xl font-bold tracking-tight text-foreground md:text-3xl break-words overflow-hidden">
                 {listing.title}
               </h1>
 
