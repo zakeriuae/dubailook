@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getSession } from '@/lib/session'
 import { Button } from '@/components/ui/button'
+import { useState, useEffect } from 'react'
+import { Sidebar } from '@/components/sidebar'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -85,7 +87,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
   const user = listing.user
 
   return (
-    <div className="relative pb-24 md:pb-0">
+    <div className="relative pb-32 md:pb-0">
       {/* Mobile-Only Header */}
       <div className="sticky top-0 z-50 flex h-14 items-center justify-between border-b bg-background/80 px-4 backdrop-blur-md md:hidden">
         <Button variant="ghost" size="icon" asChild className="h-9 w-9">

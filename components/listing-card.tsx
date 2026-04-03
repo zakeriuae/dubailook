@@ -99,7 +99,7 @@ export function ListingCard({ listing, showStatus = false, showStats = false }: 
       
       <CardHeader className="p-3 pb-1">
         <Link href={`/listings/${listing.id}`}>
-          <h3 className="line-clamp-1 text-base font-bold transition-colors hover:text-primary">
+          <h3 className="line-clamp-2 text-base font-bold transition-colors hover:text-primary break-words">
             {listing.title}
           </h3>
         </Link>
@@ -110,7 +110,7 @@ export function ListingCard({ listing, showStatus = false, showStats = false }: 
       </CardHeader>
       
       <CardContent className="px-3 pb-2 pt-0">
-        <p className="line-clamp-2 text-xs text-muted-foreground leading-relaxed">{listing.description}</p>
+        <p className="line-clamp-2 text-xs text-muted-foreground leading-relaxed break-words">{listing.description}</p>
         
         {showStats && listing.listing_stats && (
           <div className="mt-2 flex items-center gap-3 text-[10px] text-muted-foreground">
