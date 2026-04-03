@@ -14,33 +14,32 @@ export function MarqueeTitle({ title, className }: MarqueeTitleProps) {
   const [shouldMarquee, setShouldMarquee] = useState(false)
 
   useEffect(() => {
-    const checkOverflow = () => {
-      if (containerRef.current && textRef.current) {
-        // Use a small buffer to avoid flickering
-        const isOverflowing = textRef.current.offsetWidth > containerRef.current.clientWidth - 20
-        setShouldMarquee(isOverflowing)
-      }
-    }
+    if (!containerRef.current || !textRef.current) return
 
-    // Delay slightly to ensure layout is complete
-    const timeout = setTimeout(checkOverflow, 100)
-    window.addEventListener('resize', checkOverflow)
-    return () => {
-      clearTimeout(timeout)
-      window.removeEventListener('resize', checkOverflow)
-    }
+    const observer = new ResizeObserver(() => {
+      if (containerRef.current && textRef.current) {
+        const containerWidth = containerRef.current.clientWidth
+        const textWidth = textRef.current.scrollWidth
+        // If text is wider than container, marquee is needed
+        setShouldMarquee(textWidth > containerWidth)
+      }
+    })
+
+    observer.observe(containerRef.current)
+    // Also re-check when title changes
+    return () => observer.disconnect()
   }, [title])
 
   return (
     <div 
       ref={containerRef} 
-      className={cn("w-full min-w-0 overflow-hidden whitespace-nowrap text-center", className)}
+      className={cn("w-full overflow-hidden whitespace-nowrap text-center", className)}
     >
       <div className={cn(
         "inline-flex items-center",
         shouldMarquee && "animate-marquee-slow hover:[animation-play-state:paused]"
       )}>
-        <span ref={textRef} className="px-2">{title}</span>
+        <span ref={textRef} className="px-1">{title}</span>
         {shouldMarquee && <span className="px-10">{title}</span>}
       </div>
     </div>

@@ -88,19 +88,21 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
   return (
     <div className="relative pb-32 md:pb-0">
       {/* Mobile-Only Header */}
-      <div className="sticky top-0 z-50 grid grid-cols-[40px_1fr_40px] items-center h-14 border-b bg-background/80 px-4 backdrop-blur-md md:hidden">
-        <Button variant="ghost" size="icon" asChild className="h-9 w-9">
-          <Link href="/">
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
-        </Button>
-        <div className="min-w-0 flex justify-center">
+      <div className="sticky top-0 z-50 grid grid-cols-[48px_1fr_48px] items-center h-14 border-b bg-background/80 px-4 backdrop-blur-md md:hidden overflow-hidden">
+        <div className="flex items-center justify-start">
+          <Button variant="ghost" size="icon" asChild className="h-9 w-9">
+            <Link href="/">
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
+          </Button>
+        </div>
+        <div className="min-w-0 max-w-[calc(100vw-120px)] flex justify-center overflow-hidden">
           <MarqueeTitle 
             title={listing.title} 
             className="text-sm font-bold" 
           />
         </div>
-        <div className="flex justify-end">
+        <div className="flex items-center justify-end">
           <Button variant="ghost" size="icon" className="h-9 w-9">
             <Share2 className="h-5 w-5" />
           </Button>
