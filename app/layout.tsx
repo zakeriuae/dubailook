@@ -92,8 +92,13 @@ export default async function RootLayout({
   const profile = await getSession()
 
   return (
-    <html lang="en">
-      <body className={`${yekanBakh.variable} ${plusJakarta.variable} font-sans antialiased selection:bg-primary/10`}>
+    <html lang="en" className={plusJakarta.variable}>
+      <body 
+        className={`${yekanBakh.variable} antialiased selection:bg-primary/10`}
+        style={{ 
+          fontFamily: "'Yekan Bakh', var(--font-plus-jakarta), ui-sans-serif, system-ui, sans-serif" 
+        }}
+      >
         <AuthProvider initialProfile={profile}>
           <AppLayout>
             {children}
