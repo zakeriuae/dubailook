@@ -1,13 +1,13 @@
 import type { Metadata, Viewport } from 'next'
 import localFont from 'next/font/local'
-import { Inter } from 'next/font/google'
+import { Plus_Jakarta_Sans } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from 'sonner'
 import './globals.css'
 
-const inter = Inter({ 
+const plusJakarta = Plus_Jakarta_Sans({ 
   subsets: ["latin"],
-  variable: '--font-inter',
+  variable: '--font-plus-jakarta',
 });
 
 const yekanBakh = localFont({
@@ -93,7 +93,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body className={`${yekanBakh.variable} ${inter.variable} font-sans antialiased selection:bg-primary/10`}>
+      <body className={`${yekanBakh.variable} ${plusJakarta.variable} font-sans antialiased selection:bg-primary/10`}>
         <AuthProvider initialProfile={profile}>
           <AppLayout>
             {children}
