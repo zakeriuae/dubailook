@@ -27,18 +27,17 @@ export function Header() {
   }
 
   return (
-    <header className={`sticky top-0 z-40 w-full transition-all duration-300 border-b ${
-      isScrolled 
-        ? 'bg-white/95 backdrop-blur-md shadow-md border-border/50' 
+    <header className={`sticky top-0 z-40 w-full transition-all duration-300 border-b ${isScrolled
+        ? 'bg-white/95 backdrop-blur-md shadow-md border-border/50'
         : 'bg-white border-border/10'
-    }`}>
+      }`}>
       <div className="mx-auto max-w-7xl px-4 md:px-6 lg:px-8 flex h-16 items-center justify-between">
         {/* Logo: Always show on mobile. Show on desktop only if Sidebar is hidden (not authenticated) */}
         <div className="flex items-center">
           <Link href="/" className="flex items-center">
-            <img 
-              src="/logo.png" 
-              alt="Dubilook" 
+            <img
+              src="/logo.png"
+              alt="Dubilook"
               className="h-8 md:h-10 w-auto object-contain"
             />
           </Link>
@@ -94,7 +93,7 @@ export function Header() {
                     </div>
                   </div>
                   <DropdownMenuSeparator className="my-2" />
-                  
+
                   <DropdownMenuItem asChild className="rounded-lg p-2.5 cursor-pointer">
                     <Link href="/dashboard" className="flex items-center gap-3">
                       <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600">
@@ -125,9 +124,9 @@ export function Header() {
                   )}
 
                   <DropdownMenuSeparator className="my-2" />
-                  
-                  <DropdownMenuItem 
-                    onClick={logout} 
+
+                  <DropdownMenuItem
+                    onClick={logout}
                     className="rounded-lg p-2.5 cursor-pointer text-destructive hover:bg-destructive/10 focus:bg-destructive/10"
                   >
                     <div className="flex items-center gap-3">
