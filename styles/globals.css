@@ -152,8 +152,10 @@
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground font-sans;
+  
+  html, body {
+    font-family: 'Yekan Bakh', var(--font-plus-jakarta), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    @apply bg-background text-foreground;
   }
 }
 
