@@ -75,8 +75,9 @@
 }
 
 @theme inline {
-  --font-sans: var(--font-inter), var(--font-yekan-bakh), 'Geist', 'Geist Fallback';
-  --font-yekan-bakh: var(--font-yekan-bakh);
+  --font-sans: 'Yekan Bakh', var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-yekan-bakh: 'Yekan Bakh';
+  --font-inter: var(--font-inter);
   --font-mono: 'Geist Mono', 'Geist Mono Fallback';
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -123,11 +124,36 @@
 }
 
 @layer base {
+  @font-face {
+    font-family: 'Yekan Bakh';
+    src: url('/fonts/YekanBakhFaNum-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
+  }
+  @font-face {
+    font-family: 'Yekan Bakh';
+    src: url('/fonts/YekanBakhFaNum-Bold.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
+  }
+  @font-face {
+    font-family: 'Yekan Bakh';
+    src: url('/fonts/YekanBakhFaNum-SemiBold.woff2') format('woff2');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
+  }
+
   * {
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
   }
 }
 
