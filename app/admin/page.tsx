@@ -36,9 +36,9 @@ export default async function AdminPage() {
   const totalImpressions = allListings.reduce((acc, l) => acc + (l.listing_stats?.list_impressions || 0), 0)
 
   return (
-    <div className="max-w-full space-y-8 overflow-x-hidden px-1 sm:px-0">
+    <div className="max-w-full space-y-8 overflow-x-hidden px-0 sm:px-0">
       {/* Header */}
-      <div>
+      <div className="px-4">
         <h1 className="text-2xl font-bold text-foreground md:text-3xl">Admin Dashboard</h1>
         <p className="mt-1 text-muted-foreground">
           Manage listings, review submissions, and monitor platform activity
@@ -92,7 +92,7 @@ export default async function AdminPage() {
 
       {/* Listings Tabs */}
       <Tabs defaultValue="pending" className="space-y-6">
-        <div className="overflow-x-auto pb-4 hide-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
+        <div className="overflow-x-auto pb-4 hide-scrollbar px-4">
           <TabsList className="flex w-max min-w-full lg:w-auto h-auto gap-2 bg-transparent p-0 lg:bg-muted lg:p-1 lg:flex lg:grid-cols-none">
             <TabsTrigger value="pending" className="flex items-center justify-center gap-2 rounded-lg border bg-card py-2.5 px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground lg:border-none lg:bg-transparent lg:py-1.5 lg:px-3 shadow-sm lg:shadow-none">
               <Clock className="h-4 w-4 shrink-0" />

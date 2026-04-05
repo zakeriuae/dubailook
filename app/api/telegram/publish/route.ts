@@ -94,14 +94,57 @@ async function sendToTelegram(chatId: string | number, listing: Listing, ctas: L
   let lastError = 'Unknown error'
 
   try {
-    // If there's an image, send photo with caption
-    if (listing.image_url) {
+    // Handle Multi-image/Gallery support
+    const galleryItems = listing.image_urls && Array.isArray(listing.image_urls) 
+      ? listing.image_urls.filter(Boolean).slice(0, 4) 
+      : (listing.image_url ? [listing.image_url] : [])
+
+    if (galleryItems.length > 1) {
+      // Send as Media Group (Album)
+      const media = galleryItems.map((url, index) => ({
+        type: 'photo',
+        media: url,
+        caption: index === 0 ? message : '',
+        parse_mode: 'HTML',
+      }))
+
+      const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMediaGroup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: chatId,
+          media,
+          // reply_markup is NOT supported in sendMediaGroup by Telegram API
+          // We can send a separate message with buttons if needed, 
+          // or just the buttons below the single photo fallback.
+        }),
+      })
+
+      const data = await res.json()
+      if (data.ok) {
+        // Send a follow-up message with the buttons since MediaGroup doesn't support reply_markup
+        await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: `Contact info for <b>${escapeHTML(listing.title)}</b>:`,
+            parse_mode: 'HTML',
+            reply_markup,
+          }),
+        })
+        return { success: true, messageId: data.result[0].message_id }
+      }
+      lastError = data.description || 'Failed to send media group'
+      console.error('Telegram sendMediaGroup error:', JSON.stringify(data, null, 2))
+    } else if (galleryItems.length === 1) {
+      // Send as single photo
       const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           chat_id: chatId,
-          photo: listing.image_url,
+          photo: galleryItems[0],
           caption: message,
           parse_mode: 'HTML',
           reply_markup,

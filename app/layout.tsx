@@ -93,7 +93,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body className={`${yekanBakh.variable} ${inter.variable} font-yekan-bakh antialiased selection:bg-primary/10`}>
+      <body className={`${yekanBakh.variable} ${inter.variable} font-sans antialiased selection:bg-primary/10`}>
         <AuthProvider initialProfile={profile}>
           <AppLayout>
             {children}

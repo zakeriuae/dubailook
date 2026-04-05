@@ -75,7 +75,7 @@
 }
 
 @theme inline {
-  --font-sans: var(--font-yekan-bakh), var(--font-inter), 'Geist', 'Geist Fallback';
+  --font-sans: var(--font-inter), var(--font-yekan-bakh), 'Geist', 'Geist Fallback';
   --font-yekan-bakh: var(--font-yekan-bakh);
   --font-mono: 'Geist Mono', 'Geist Mono Fallback';
   --color-background: var(--background);

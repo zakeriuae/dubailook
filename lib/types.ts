@@ -23,6 +23,7 @@ export interface Listing {
   description: string
   listing_type: ListingType
   image_url: string | null
+  image_urls?: string[] | null
   status: ListingStatus
   publishing_mode: PublishingMode
   created_at: string
