@@ -114,9 +114,6 @@ async function sendToTelegram(chatId: string | number, listing: Listing, ctas: L
         body: JSON.stringify({
           chat_id: chatId,
           media,
-          // reply_markup is NOT supported in sendMediaGroup by Telegram API
-          // We can send a separate message with buttons if needed, 
-          // or just the buttons below the single photo fallback.
         }),
       })
 
@@ -128,7 +125,7 @@ async function sendToTelegram(chatId: string | number, listing: Listing, ctas: L
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             chat_id: chatId,
-            text: `Contact info for <b>${escapeHTML(listing.title)}</b>:`,
+            text: `Contact details for: <b>${escapeHTML(listing.title)}</b>`,
             parse_mode: 'HTML',
             reply_markup,
           }),

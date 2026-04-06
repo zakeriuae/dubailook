@@ -10,52 +10,6 @@ const plusJakarta = Plus_Jakarta_Sans({
   variable: '--font-plus-jakarta',
 });
 
-const yekanBakh = localFont({
-  src: [
-    {
-      path: '../public/fonts/YekanBakhFaNum-Thin.woff2',
-      weight: '100',
-      style: 'normal',
-    },
-    {
-      path: '../public/fonts/YekanBakhFaNum-Light.woff2',
-      weight: '300',
-      style: 'normal',
-    },
-    {
-      path: '../public/fonts/YekanBakhFaNum-Regular.woff2',
-      weight: '400',
-      style: 'normal',
-    },
-    {
-      path: '../public/fonts/YekanBakhFaNum-SemiBold.woff2',
-      weight: '600',
-      style: 'normal',
-    },
-    {
-      path: '../public/fonts/YekanBakhFaNum-Bold.woff2',
-      weight: '700',
-      style: 'normal',
-    },
-    {
-      path: '../public/fonts/YekanBakhFaNum-ExtraBold.woff2',
-      weight: '800',
-      style: 'normal',
-    },
-    {
-      path: '../public/fonts/YekanBakhFaNum-Black.woff2',
-      weight: '900',
-      style: 'normal',
-    },
-    {
-      path: '../public/fonts/YekanBakhFaNum-ExtraBlack.woff2',
-      weight: '950',
-      style: 'normal',
-    },
-  ],
-  variable: '--font-yekan-bakh',
-})
-
 export const metadata: Metadata = {
   title: 'Dubilook - Property Listings Platform',
   description: 'Find and list properties, land, and real estate projects. Connect with buyers and sellers through Telegram.',
@@ -94,7 +48,7 @@ export default async function RootLayout({
   return (
     <html lang="en" className={plusJakarta.variable}>
       <body 
-        className={`${yekanBakh.variable} antialiased selection:bg-primary/10`}
+        className="antialiased selection:bg-primary/10"
         style={{ 
           fontFamily: "'Yekan Bakh', var(--font-plus-jakarta), ui-sans-serif, system-ui, sans-serif" 
         }}

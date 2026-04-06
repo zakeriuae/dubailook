@@ -79,6 +79,7 @@ export async function POST(request: NextRequest) {
         listing_type,
         publishing_mode,
         image_url: imageUrls[0] ?? null,
+        image_urls: imageUrls,
         status: 'pending',
       })
       .select()
