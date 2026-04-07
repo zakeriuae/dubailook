@@ -15,6 +15,8 @@ import {
 import { LISTING_TYPE_LABELS, LISTING_STATUS_LABELS } from '@/lib/types'
 import type { Listing } from '@/lib/types'
 import { ContactButtons } from '@/components/contact-buttons'
+import { ImageGallery } from '@/components/image-gallery'
+
 import { getOptimizedImageUrl } from '@/lib/storage'
 import { getAvatarColor, getInitials, cn } from '@/lib/utils'
 
@@ -125,52 +127,24 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         <div className="grid gap-6 md:gap-8 lg:grid-cols-3">
           {/* Main Content */}
           <div className="lg:col-span-2">
-            <div className="relative overflow-hidden md:rounded-xl bg-transparent md:bg-muted">
+            <div className="relative overflow-hidden md:rounded-xl">
               {listing.image_urls && listing.image_urls.length > 0 ? (
-                <div className="group relative">
-                  {/* Gallery Scroll Container */}
-                  <div className="flex aspect-video w-full snap-x snap-mandatory overflow-x-auto scroll-smooth hide-scrollbar">
-                    {listing.image_urls.map((url, index) => (
-                      <div key={index} className="relative flex-none w-full snap-center aspect-video">
-                        <Image
-                          src={getOptimizedImageUrl(url, { width: 800 })}
-                          alt={`${listing.title} - ${index + 1}`}
-                          fill
-                          className="object-cover"
-                          priority={index === 0}
-                        />
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Navigation Bullets (Mobile) */}
-                  {listing.image_urls.length > 1 && (
-                    <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-1.5 md:hidden">
-                      {listing.image_urls.map((_, i) => (
-                        <div key={i} className="h-1.5 w-1.5 rounded-full bg-white/50" />
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Multi-photo badge */}
-                  {listing.image_urls.length > 1 && (
-                    <Badge variant="secondary" className="absolute bottom-4 right-4 bg-black/50 text-white border-none backdrop-blur-sm">
-                      1 / {listing.image_urls.length}
-                    </Badge>
-                  )}
-                </div>
+                <ImageGallery 
+                  images={listing.image_urls} 
+                  title={listing.title} 
+                />
               ) : listing.image_url ? (
-                <div className="relative aspect-video">
+                <div className="relative aspect-video overflow-hidden md:rounded-xl bg-muted">
                   <Image
-                    src={getOptimizedImageUrl(listing.image_url, { width: 800 })}
+                    src={getOptimizedImageUrl(listing.image_url, { width: 1200 })}
                     alt={listing.title}
                     fill
-                    className="object-cover"
+                    className="object-contain"
                     priority
                   />
                 </div>
               ) : (
-                <div className="flex h-full min-h-[300px] items-center justify-center">
+                <div className="flex h-full min-h-[300px] items-center justify-center bg-muted md:rounded-xl">
                   {typeIcons[listing.listing_type]}
                   <span className="ml-2 text-lg text-muted-foreground">
                     {LISTING_TYPE_LABELS[listing.listing_type]}
@@ -178,6 +152,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                 </div>
               )}
             </div>
+
 
             <div className="mt-4 px-6 md:px-0">
               <div className="flex flex-wrap items-center gap-2">
