@@ -199,11 +199,6 @@ export function ListingForm() {
   }
 
   const onSubmit = async (data: ListingFormData) => {
-    if (step < 4) {
-      if (canProceed()) setStep(step + 1)
-      return
-    }
-
     const activeCtas = []
     if (whatsapp.enabled && whatsapp.value.trim()) activeCtas.push({ type: 'whatsapp' as const, value: whatsapp.value.trim() })
     if (telegram.enabled && telegram.value.trim()) activeCtas.push({ type: 'telegram' as const, value: telegram.value.trim() })
@@ -218,6 +213,7 @@ export function ListingForm() {
         toast.error('Please wait for images to finish uploading')
         return
     }
+
 
     setIsSubmitting(true)
     try {
@@ -259,7 +255,16 @@ export function ListingForm() {
   }
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)}>
+    <form 
+      onSubmit={form.handleSubmit(onSubmit)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' && e.target instanceof HTMLInputElement) {
+          e.preventDefault()
+        }
+      }}
+    >
+
+
       <div className="mb-8 flex items-center justify-center gap-2">
         {[1, 2, 3, 4].map((s) => (
           <div key={s} className="flex items-center">
@@ -336,7 +341,7 @@ export function ListingForm() {
                 </span>
               </div>
               <Input id="title" placeholder="Summarize your offer (No phone/links)" {...form.register('title')} maxLength={60} />
-              {form.formState.errors.title && (
+              {form.formState.errors.title?.message && (
                 <p className="text-xs font-medium text-destructive mt-1">{form.formState.errors.title.message}</p>
               )}
             </div>
@@ -350,7 +355,7 @@ export function ListingForm() {
                 {...form.register('description')} 
                 maxLength={500}
               />
-              {form.formState.errors.description && (
+              {form.formState.errors.description?.message && (
                 <p className="text-xs font-medium text-destructive mt-1">{form.formState.errors.description.message}</p>
               )}
               <div className="flex justify-end">
