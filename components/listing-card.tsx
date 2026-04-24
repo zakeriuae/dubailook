@@ -91,53 +91,52 @@ export function ListingCard({ listing, showStatus = false, showStats = false }: 
         </Link>
       ) : null}
       
-      <CardHeader className="p-3 pb-1">
+      <CardHeader className="p-3 pb-0">
         {!listing.image_url && (
-          <div className="flex flex-wrap items-center gap-2 mb-2">
-            <Badge variant="secondary" className="gap-1 text-[10px] h-5">
+          <div className="flex flex-wrap items-center gap-2 mb-1.5">
+            <Badge variant="secondary" className="gap-1 text-[10px] h-4 px-1.5">
               {typeIcons[listing.listing_type]}
               {LISTING_TYPE_LABELS[listing.listing_type]}
             </Badge>
             {showStatus && (
-              <Badge variant="outline" className={`text-[10px] h-5 ${statusColors[listing.status]}`}>
+              <Badge variant="outline" className={`text-[10px] h-4 px-1.5 ${statusColors[listing.status]}`}>
                 {LISTING_STATUS_LABELS[listing.status]}
               </Badge>
             )}
           </div>
         )}
         <Link href={`/listings/${listing.id}`}>
-          <h3 className="line-clamp-2 text-base font-bold transition-colors hover:text-primary break-words">
+          <h3 className="line-clamp-2 text-sm md:text-base font-bold transition-colors hover:text-primary break-words leading-tight">
             {listing.title}
           </h3>
         </Link>
-        <div className="flex items-center gap-1 text-[10px] text-muted-foreground mt-0.5">
-          <Clock className="h-3 w-3" />
+        <div className="flex items-center gap-1 text-[9px] text-muted-foreground mt-0.5">
+          <Clock className="h-2.5 w-2.5" />
           {formatRelativeDate(listing.created_at)}
         </div>
       </CardHeader>
       
-      <CardContent className="px-3 pb-2 pt-0">
-        <FormattedText 
-          text={listing.description} 
-          className="line-clamp-2 text-xs text-muted-foreground leading-relaxed break-words"
-        />
+      <CardContent className="px-3 pb-1 pt-1.5">
+        <div className="line-clamp-2 text-[11px] text-muted-foreground leading-snug break-words">
+          {listing.description.replace(/\n+/g, ' ')}
+        </div>
         
         {showStats && listing.listing_stats && (
-          <div className="mt-2 flex items-center gap-3 text-[10px] text-muted-foreground">
+          <div className="mt-1.5 flex items-center gap-3 text-[9px] text-muted-foreground">
             <span className="flex items-center gap-1">
-              <Eye className="h-3 w-3" />
-              {listing.listing_stats.page_views} views
+              <Eye className="h-2.5 w-2.5" />
+              {listing.listing_stats.page_views}
             </span>
             <span className="flex items-center gap-1">
-              <Users className="h-3 w-3" />
-              {listing.listing_stats.list_impressions} impressions
+              <Users className="h-2.5 w-2.5" />
+              {listing.listing_stats.list_impressions}
             </span>
           </div>
         )}
       </CardContent>
       
       {listing.listing_cta && listing.listing_cta.length > 0 && (
-        <CardFooter className="flex flex-wrap gap-2 px-3 pb-3 pt-0">
+        <CardFooter className="flex flex-wrap gap-1.5 px-3 pb-3 pt-1">
           {listing.listing_cta.map((cta) => (
             <CTAButton key={cta.id} cta={cta} />
           ))}
