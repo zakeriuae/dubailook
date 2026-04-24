@@ -108,7 +108,8 @@ export async function GET(request: NextRequest) {
 
       // Publish to Telegram
       try {
-        const publishRes = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/telegram/publish`, {
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://dubilook.ae'
+        const publishRes = await fetch(`${baseUrl}/api/telegram/publish`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ listingId: listing.id }),
