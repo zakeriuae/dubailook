@@ -29,14 +29,15 @@ export function ListingsGrid({
   }
 
   return (
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 [column-fill:_balance]">
       {listings.map((listing) => (
-        <ListingCard 
-          key={listing.id} 
-          listing={listing} 
-          showStatus={showStatus}
-          showStats={showStats}
-        />
+        <div key={listing.id} className="break-inside-avoid-column mb-6">
+          <ListingCard 
+            listing={listing} 
+            showStatus={showStatus}
+            showStats={showStats}
+          />
+        </div>
       ))}
     </div>
   )
