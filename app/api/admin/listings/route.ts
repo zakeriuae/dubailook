@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
     if (action === 'publish' || action === 'approve' || action === 'repost') {
       try {
         const origin = request.headers.get('origin') || ''
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || origin || 'http://localhost:3000'
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || origin || 'https://dubilook.ae'
         
         const publishRes = await fetch(`${baseUrl}/api/telegram/publish`, {
           method: 'POST',

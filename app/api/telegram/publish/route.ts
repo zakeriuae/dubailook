@@ -259,7 +259,7 @@ export async function POST(request: NextRequest) {
     }
 
     const origin = request.headers.get('origin') || request.headers.get('referer') || ''
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || origin || 'https://dubilook.zakeri.dev'
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || origin || 'https://dubilook.ae'
 
     // Broadcast to all channels
     let successCount = 0

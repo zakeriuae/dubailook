@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation'
+import { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { FormattedText } from '@/components/formatted-text'
@@ -10,7 +11,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { 
   Building2, LandPlot, Briefcase, Package, Users, 
-  ArrowLeft, Calendar, Eye, Share2
+  ArrowLeft, Calendar, Eye
 } from 'lucide-react'
 import { LISTING_TYPE_LABELS, LISTING_STATUS_LABELS } from '@/lib/types'
 import type { Listing } from '@/lib/types'
@@ -19,6 +20,45 @@ import { ImageGallery } from '@/components/image-gallery'
 
 import { getOptimizedImageUrl } from '@/lib/storage'
 import { getAvatarColor, getInitials, cn } from '@/lib/utils'
+import { ShareButton } from '@/components/share-button'
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+  const supabase = await createClient()
+
+  const { data: listing } = await supabase
+    .from('listings')
+    .select('title, description, image_url')
+    .eq('id', id)
+    .single()
+
+  if (!listing) return { title: 'Listing Not Found' }
+
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://dubilook.ae'
+  const url = `${baseUrl}/listings/${id}`
+
+  return {
+    title: `${listing.title} | Dubilook`,
+    description: listing.description.slice(0, 160),
+    openGraph: {
+      title: listing.title,
+      description: listing.description.slice(0, 160),
+      url: url,
+      siteName: 'Dubilook',
+      images: listing.image_url ? [listing.image_url] : [],
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: listing.title,
+      description: listing.description.slice(0, 160),
+      images: listing.image_url ? [listing.image_url] : [],
+    },
+    alternates: {
+      canonical: url,
+    },
+  }
+}
 
 export const dynamic = 'force-dynamic'
 
@@ -108,9 +148,10 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
           </Link>
         </div>
         <div className="flex items-center justify-end">
-          <Button variant="ghost" size="icon" className="h-9 w-9">
-            <Share2 className="h-5 w-5" />
-          </Button>
+          <ShareButton 
+            title={listing.title} 
+            className="h-9 w-9" 
+          />
         </div>
       </div>
 
