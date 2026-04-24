@@ -1,13 +1,14 @@
 import type { Metadata, Viewport } from 'next'
 import localFont from 'next/font/local'
-import { Inter } from 'next/font/google'
+import { Roboto } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from 'sonner'
 import './globals.css'
 
-const inter = Inter({ 
+const roboto = Roboto({ 
   subsets: ["latin"],
-  variable: '--font-inter',
+  weight: ['400', '500', '700'],
+  variable: '--font-roboto',
 });
 
 export const metadata: Metadata = {
@@ -46,11 +47,11 @@ export default async function RootLayout({
   const profile = await getSession()
 
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={roboto.variable}>
       <body 
         className="antialiased selection:bg-primary/10"
         style={{ 
-          fontFamily: "'Yekan Bakh', var(--font-inter), ui-sans-serif, system-ui, sans-serif" 
+          fontFamily: "var(--font-roboto), 'Yekan Bakh', ui-sans-serif, system-ui, sans-serif" 
         }}
       >
         <AuthProvider initialProfile={profile}>
