@@ -15,8 +15,11 @@ declare global {
   }
 }
 
+import { useAuth } from '@/lib/auth-context'
+
 export function TelegramLogin() {
   const router = useRouter()
+  const { refresh } = useAuth()
   const searchParams = useSearchParams()
   const containerRef = useRef<HTMLDivElement>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -35,6 +38,7 @@ export function TelegramLogin() {
 
       if (res.ok) {
         toast.success('Login successful!')
+        await refresh() // Update auth state immediately
         const redirect = searchParams.get('redirect') || data.redirect || '/dashboard'
         router.push(redirect)
         router.refresh()

@@ -18,6 +18,11 @@ export function AuthProvider({ children, initialProfile }: { children: ReactNode
   const [profile, setProfile] = useState<Profile | null>(initialProfile)
   const [isLoading, setIsLoading] = useState(false)
 
+  // Sync state with prop if it changes (e.g. after router.refresh())
+  useEffect(() => {
+    setProfile(initialProfile)
+  }, [initialProfile])
+
   const refresh = async () => {
     setIsLoading(true)
     try {

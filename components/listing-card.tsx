@@ -69,34 +69,42 @@ function CTAButton({ cta }: { cta: ListingCTA }) {
 export function ListingCard({ listing, showStatus = false, showStats = false }: ListingCardProps) {
   return (
     <Card className="group overflow-hidden transition-all hover:shadow-lg p-0">
-      <Link href={`/listings/${listing.id}`}>
-        <div className="relative aspect-video overflow-hidden bg-muted">
-          {listing.image_url ? (
+      {listing.image_url ? (
+        <Link href={`/listings/${listing.id}`}>
+          <div className="relative aspect-video overflow-hidden bg-muted">
             <Image
               src={getOptimizedImageUrl(listing.image_url, { width: 400 })}
               alt={listing.title}
               fill
               className="object-cover transition-transform duration-500 scale-105 group-hover:scale-110"
             />
-          ) : (
-            <div className="flex h-full items-center justify-center">
+            <Badge className="absolute left-3 top-3 gap-1">
               {typeIcons[listing.listing_type]}
-              <span className="ml-2 text-muted-foreground">{LISTING_TYPE_LABELS[listing.listing_type]}</span>
-            </div>
-          )}
-          <Badge className="absolute left-3 top-3 gap-1">
-            {typeIcons[listing.listing_type]}
-            {LISTING_TYPE_LABELS[listing.listing_type]}
-          </Badge>
-          {showStatus && (
-            <Badge className={`absolute right-3 top-3 ${statusColors[listing.status]}`}>
-              {LISTING_STATUS_LABELS[listing.status]}
+              {LISTING_TYPE_LABELS[listing.listing_type]}
             </Badge>
-          )}
-        </div>
-      </Link>
+            {showStatus && (
+              <Badge className={`absolute right-3 top-3 ${statusColors[listing.status]}`}>
+                {LISTING_STATUS_LABELS[listing.status]}
+              </Badge>
+            )}
+          </div>
+        </Link>
+      ) : null}
       
       <CardHeader className="p-3 pb-1">
+        {!listing.image_url && (
+          <div className="flex flex-wrap items-center gap-2 mb-2">
+            <Badge variant="secondary" className="gap-1 text-[10px] h-5">
+              {typeIcons[listing.listing_type]}
+              {LISTING_TYPE_LABELS[listing.listing_type]}
+            </Badge>
+            {showStatus && (
+              <Badge variant="outline" className={`text-[10px] h-5 ${statusColors[listing.status]}`}>
+                {LISTING_STATUS_LABELS[listing.status]}
+              </Badge>
+            )}
+          </div>
+        )}
         <Link href={`/listings/${listing.id}`}>
           <h3 className="line-clamp-2 text-base font-bold transition-colors hover:text-primary break-words">
             {listing.title}
