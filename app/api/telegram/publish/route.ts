@@ -22,7 +22,7 @@ function ensureAbsoluteUrl(url: string, fallbackBase?: string): string {
   return `https://${url.replace(/^\/+/, '')}`
 }
 
-async function sendToTelegram(chatId: string | number, listing: Listing, ctas: ListingCTA[], baseUrl: string): Promise<{ success: boolean; messageId?: number; error?: string }> {
+async function sendToTelegram(chatId: string | number, listing: Listing, ctas: ListingCTA[], baseUrl: string): Promise<{ success: boolean; messageId?: number; error?: string; retryAfter?: number }> {
   if (!TELEGRAM_BOT_TOKEN) {
     return { success: false, error: 'Telegram bot token not configured' }
   }
@@ -92,6 +92,7 @@ async function sendToTelegram(chatId: string | number, listing: Listing, ctas: L
 
   const reply_markup = { inline_keyboard: buttons }
   let lastError = 'Unknown error'
+  let retryAfter: number | undefined
 
   try {
     // Handle Multi-image/Gallery support
@@ -132,6 +133,10 @@ async function sendToTelegram(chatId: string | number, listing: Listing, ctas: L
         })
         return { success: true, messageId: data.result[0].message_id }
       }
+      if (data.error_code === 429) {
+        retryAfter = data.parameters?.retry_after ?? 30
+        return { success: false, error: `Rate limited by Telegram. Please wait ${retryAfter} seconds before reposting.`, retryAfter }
+      }
       lastError = data.description || 'Failed to send media group'
       console.error('Telegram sendMediaGroup error:', JSON.stringify(data, null, 2))
     } else if (galleryItems.length === 1) {
@@ -151,6 +156,10 @@ async function sendToTelegram(chatId: string | number, listing: Listing, ctas: L
       const data = await res.json()
       if (data.ok) {
         return { success: true, messageId: data.result.message_id }
+      }
+      if (data.error_code === 429) {
+        retryAfter = data.parameters?.retry_after ?? 30
+        return { success: false, error: `Rate limited by Telegram. Please wait ${retryAfter} seconds before reposting.`, retryAfter }
       }
       lastError = data.description || 'Failed to send photo'
       console.error('Telegram sendPhoto error:', JSON.stringify(data, null, 2))
@@ -172,6 +181,10 @@ async function sendToTelegram(chatId: string | number, listing: Listing, ctas: L
     const data = await res.json()
     if (data.ok) {
       return { success: true, messageId: data.result.message_id }
+    }
+    if (data.error_code === 429) {
+      retryAfter = data.parameters?.retry_after ?? 30
+      return { success: false, error: `Rate limited by Telegram. Please wait ${retryAfter} seconds before reposting.`, retryAfter }
     }
     lastError = data.description || 'Failed to send message'
     console.error('Telegram sendMessage error:', JSON.stringify(data, null, 2))
@@ -272,6 +285,13 @@ export async function POST(request: NextRequest) {
         successCount++
         lastMessageId = result.messageId
       } else {
+        // If Telegram rate-limited us, surface the 429 immediately
+        if (result.retryAfter) {
+          return NextResponse.json(
+            { error: result.error || `Too Many Requests: retry after ${result.retryAfter}` },
+            { status: 429 }
+          )
+        }
         lastPublishError = result.error
       }
     }

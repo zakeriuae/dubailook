@@ -82,6 +82,10 @@ export async function POST(request: NextRequest) {
           const errorData = await publishRes.json().catch(() => ({ error: 'Unknown publishing error' }))
           publishError = errorData.error || 'Failed to send to Telegram'
           console.error('Telegram publish API failed:', errorData)
+          
+          if (publishRes.status === 429) {
+            return NextResponse.json({ error: publishError }, { status: 429 })
+          }
         }
       } catch (e) {
         publishError = 'Connection error to publishing service'
