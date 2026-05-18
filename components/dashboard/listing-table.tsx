@@ -18,7 +18,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { toast } from 'sonner'
-import { Eye, ExternalLink, Clock, CheckCircle, XCircle, Send } from 'lucide-react'
+import { Eye, ExternalLink, Clock, CheckCircle, XCircle, Send, Pencil } from 'lucide-react'
 import { LISTING_TYPE_LABELS, LISTING_STATUS_LABELS } from '@/lib/types'
 import type { Listing } from '@/lib/types'
 import { getOptimizedImageUrl } from '@/lib/storage'
@@ -200,6 +200,13 @@ export function DashboardListingTable({ listings }: DashboardListingTableProps) 
                       </Link>
                     </Button>
 
+                    <Button size="sm" variant="outline" className="h-8 gap-1.5 border-orange-200 text-orange-600 hover:bg-orange-50" asChild>
+                      <Link href={`/listings/${listing.id}/edit`}>
+                        <Pencil className="h-3.5 w-3.5" />
+                        Edit
+                      </Link>
+                    </Button>
+
                     {(listing.status === 'published' || listing.status === 'approved') && (
                       <Button
                         size="sm"
@@ -286,6 +293,13 @@ export function DashboardListingTable({ listings }: DashboardListingTableProps) 
                   <Link href={`/listings/${listing.id}`}>
                     <ExternalLink className="h-4 w-4" />
                     Details
+                  </Link>
+                </Button>
+
+                <Button variant="outline" size="sm" className="h-9 flex-1 gap-1.5 border-orange-200 text-orange-600 hover:bg-orange-50" asChild>
+                  <Link href={`/listings/${listing.id}/edit`}>
+                    <Pencil className="h-4 w-4" />
+                    Edit
                   </Link>
                 </Button>
 

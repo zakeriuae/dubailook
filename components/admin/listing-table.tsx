@@ -28,7 +28,7 @@ import {
 } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
-import { CheckCircle, XCircle, Send, Eye, ExternalLink, Clock } from 'lucide-react'
+import { CheckCircle, XCircle, Send, Eye, ExternalLink, Clock, Pencil } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { LISTING_TYPE_LABELS } from '@/lib/types'
@@ -48,6 +48,7 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false)
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null)
   const [rejectReason, setRejectReason] = useState('')
+  const [isRepostingAll, setIsRepostingAll] = useState(false)
 
   const handleAction = async (listingId: string, action: 'approve' | 'reject' | 'publish' | 'repost' | 'deactivate' | 'activate', reason?: string) => {
     setIsLoading(listingId)
@@ -81,6 +82,54 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
     setRejectDialogOpen(true)
   }
 
+  const handleRepostAll = async () => {
+    const publishedListings = listings.filter(l => l.status === 'published')
+    if (publishedListings.length === 0) {
+      toast.info('No published listings to repost')
+      return
+    }
+
+    setIsRepostingAll(true)
+    toast.info(`Starting to repost ${publishedListings.length} listings...`)
+
+    for (let i = 0; i < publishedListings.length; i++) {
+      const listing = publishedListings[i]
+      setIsLoading(listing.id)
+      
+      try {
+        const res = await fetch('/api/admin/listings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ listingId: listing.id, action: 'repost' }),
+        })
+
+        const data = await res.json()
+
+        if (res.ok) {
+          toast.success(`[${i + 1}/${publishedListings.length}] Reposted "${listing.title}"`)
+        } else if (res.status === 429) {
+          toast.warning(`Rate limited. Waiting 30 seconds before retrying "${listing.title}"...`)
+          await new Promise(resolve => setTimeout(resolve, 30000))
+          i-- // retry this one
+          continue
+        } else {
+          toast.error(`Failed to repost "${listing.title}": ${data.error || 'Unknown error'}`)
+        }
+      } catch (error) {
+        toast.error(`Error reposting "${listing.title}"`)
+      } finally {
+        setIsLoading(null)
+      }
+
+      // Add a small delay between successful requests to be safe
+      await new Promise(resolve => setTimeout(resolve, 2000))
+    }
+
+    setIsRepostingAll(false)
+    toast.success('Finished reposting all listings')
+    router.refresh()
+  }
+
   if (listings.length === 0) {
     return (
       <Empty className="py-8">
@@ -92,6 +141,21 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
 
   return (
     <>
+      <div className="flex justify-between items-center mb-4 px-4 md:px-0">
+        <div className="text-sm text-muted-foreground">
+          Total: {listings.length} listings
+        </div>
+        <Button 
+          onClick={handleRepostAll} 
+          disabled={isRepostingAll || listings.filter(l => l.status === 'published').length === 0}
+          className="gap-2"
+          variant="outline"
+          size="sm"
+        >
+          {isRepostingAll ? <Spinner className="h-3 w-3" /> : <Send className="h-3 w-3" />}
+          Repost All Published
+        </Button>
+      </div>
       {/* Desktop Table View */}
       <div className="hidden border-t md:block">
         <Table>
@@ -181,6 +245,11 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-1.5">
+                    <Button size="sm" variant="ghost" className="h-8 w-8 p-0" asChild>
+                      <Link href={`/listings/${listing.id}/edit`}>
+                        <Pencil className="h-4 w-4 text-orange-600" />
+                      </Link>
+                    </Button>
                     <Button size="sm" variant="ghost" className="h-8 w-8 p-0" asChild>
                       <Link href={`/listings/${listing.id}`}>
                         <ExternalLink className="h-4 w-4" />
@@ -347,6 +416,13 @@ export function AdminListingTable({ listings, showActions = false, showPublishAc
                   <Link href={`/listings/${listing.id}`}>
                     <Eye className="h-3.5 w-3.5" />
                     Preview
+                  </Link>
+                </Button>
+
+                <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-[10px] text-orange-600 px-1.5" asChild>
+                  <Link href={`/listings/${listing.id}/edit`}>
+                    <Pencil className="h-3.5 w-3.5" />
+                    Edit
                   </Link>
                 </Button>
 

@@ -19,7 +19,7 @@ import {
   Upload, Phone, MessageCircle, Link as LinkIcon, ArrowLeft, ArrowRight, Check, X
 } from 'lucide-react'
 import { LISTING_TYPE_LABELS, PUBLISHING_MODE_LABELS } from '@/lib/types'
-import type { ListingType, PublishingMode, CTAType, Profile } from '@/lib/types'
+import type { ListingType, PublishingMode, CTAType, Profile, Listing, ListingCTA } from '@/lib/types'
 
 const listingSchema = z.object({
   title: z.string()
@@ -68,7 +68,11 @@ const publishingModes: PublishingMode[] = ['one_time', 'ten_times_daily', 'ten_t
 
 import { createClient } from '@/lib/supabase/client'
 
-export function ListingForm() {
+interface ListingFormProps {
+  listing?: Listing & { listing_cta?: ListingCTA[] }
+}
+
+export function ListingForm({ listing }: ListingFormProps = {}) {
   const router = useRouter()
   const [step, setStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -90,11 +94,11 @@ export function ListingForm() {
         if (data.profile) {
           setProfile(data.profile)
           // Pre-fill Telegram
-          if (data.profile.telegram_username) {
+          if (data.profile.telegram_username && !listing) {
             setTelegram(prev => ({ ...prev, value: `@${data.profile.telegram_username}`, enabled: true }))
           }
           // Pre-fill WhatsApp
-          if (data.profile.whatsapp) {
+          if (data.profile.whatsapp && !listing) {
             setWhatsapp(prev => ({ ...prev, value: data.profile.whatsapp, enabled: true }))
           }
         }
@@ -103,6 +107,31 @@ export function ListingForm() {
     
     return () => { mounted = false }
   }, [])
+
+  useEffect(() => {
+    if (listing) {
+      form.reset({
+        title: listing.title,
+        description: listing.description,
+        listing_type: listing.listing_type,
+        publishing_mode: listing.publishing_mode,
+      })
+      
+      if (listing.image_urls) {
+        setImages(listing.image_urls.map(url => ({ id: Math.random().toString(36).substring(7), url, uploading: false })))
+      } else if (listing.image_url) {
+        setImages([{ id: Math.random().toString(36).substring(7), url: listing.image_url, uploading: false }])
+      }
+      
+      if (listing.listing_cta) {
+        listing.listing_cta.forEach(cta => {
+          if (cta.cta_type === 'whatsapp') setWhatsapp({ enabled: true, value: cta.value })
+          if (cta.cta_type === 'telegram') setTelegram({ enabled: true, value: cta.value })
+          if (cta.cta_type === 'url') setUrl({ enabled: true, value: cta.value, label: cta.label || '' })
+        })
+      }
+    }
+  }, [listing, form])
 
   const form = useForm<ListingFormData>({
     resolver: zodResolver(listingSchema),
@@ -220,12 +249,13 @@ export function ListingForm() {
       const formData = new FormData()
       formData.append('data', JSON.stringify({ 
         ...data, 
+        listingId: listing?.id,
         ctas: activeCtas,
         image_urls: images.map(img => img.url).filter(Boolean) as string[] // Send the uploaded URLs
       }))
       
       const res = await fetch('/api/listings', {
-        method: 'POST',
+        method: listing ? 'PUT' : 'POST',
         body: formData,
       })
 

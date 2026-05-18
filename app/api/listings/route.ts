@@ -136,3 +136,105 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
+
+export async function PUT(request: NextRequest) {
+  try {
+    const profile = await requireAuth()
+    const formData = await request.formData()
+    const dataStr = formData.get('data') as string
+    
+    if (!dataStr) {
+      return NextResponse.json({ error: 'Missing data' }, { status: 400 })
+    }
+
+    const data = JSON.parse(dataStr)
+    const { listingId, title, description, listing_type, publishing_mode, ctas } = data
+
+    if (!listingId || !title || !description || !listing_type || !publishing_mode || !ctas) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    }
+
+    // Validation (same as POST)
+    const urlRegex = /(https?:\/\/|www\.)[^\s]+|(\b[a-z0-9]+\.[a-z]{2,})/gi
+    if (urlRegex.test(title)) {
+      return NextResponse.json({ error: 'Links and URLs are not allowed in the title' }, { status: 400 })
+    }
+    if (description.length > 500) {
+      return NextResponse.json({ error: 'Description cannot exceed 500 characters' }, { status: 400 })
+    }
+    if (urlRegex.test(description)) {
+      return NextResponse.json({ error: 'Links and URLs are not allowed in the description' }, { status: 400 })
+    }
+    if (!/[a-zA-Z]{2,}/.test(description)) {
+      return NextResponse.json({ error: 'Posts can be in any language, but an English translation is required in the description.' }, { status: 400 })
+    }
+
+    const supabase = await createAdminClient()
+
+    // Fetch existing listing to check ownership
+    const { data: existingListing, error: fetchError } = await supabase
+      .from('listings')
+      .select('user_id')
+      .eq('id', listingId)
+      .single()
+
+    if (fetchError || !existingListing) {
+      return NextResponse.json({ error: 'Listing not found' }, { status: 404 })
+    }
+
+    // Check authorization: owner or admin
+    if (existingListing.user_id !== profile.id && !profile.is_admin) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    const imageUrls: string[] = data.image_urls || []
+
+    // Update listing
+    const { error: updateError } = await supabase
+      .from('listings')
+      .update({
+        title,
+        description,
+        listing_type,
+        publishing_mode,
+        image_url: imageUrls[0] ?? null,
+        image_urls: imageUrls,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', listingId)
+
+    if (updateError) {
+      console.error('Listing update error:', updateError)
+      return NextResponse.json({ error: 'Failed to update listing' }, { status: 500 })
+    }
+
+    // Update CTAs: delete old and insert new
+    await supabase
+      .from('listing_cta')
+      .delete()
+      .eq('listing_id', listingId)
+
+    const ctaEntries = ctas.map((cta: { type: CTAType; value: string; label?: string }) => ({
+      listing_id: listingId,
+      cta_type: cta.type,
+      value: cta.value,
+      label: cta.label || null,
+    }))
+
+    const { error: ctaError } = await supabase
+      .from('listing_cta')
+      .insert(ctaEntries)
+
+    if (ctaError) {
+      console.error('CTA update error:', ctaError)
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Update listing error:', error)
+    if ((error as Error).message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
